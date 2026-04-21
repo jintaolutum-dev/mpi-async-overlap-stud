@@ -1,0 +1,354 @@
+Loading intel-mpi/2021.16.0
+  Loading requirement: intel/2024.1.0
+
+===== 00_async0_c1_waitall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 1 --cpu-bind=cores
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=slurm --cpu-bind=cores
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=slurm allowed=0,112 main_cpu_list=0
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=slurm allowed=56,168 main_cpu_list=56
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=slurm allowed=0,112 main_cpu_list=0
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=slurm allowed=56,168 main_cpu_list=56
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;wait_all;-comm;wait_send;wait_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using wait_all method
+Wait Send using wait_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 00_async0_c1_waitall exit code: 0 =====
+
+===== 01_async0_c4_waitall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 4 --cpu-bind=cores
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=slurm --cpu-bind=cores
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=slurm allowed=56-57,168-169 main_cpu_list=56,57,168,169
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=slurm allowed=0-1,112-113 main_cpu_list=0,1,112,113
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=slurm allowed=0-1,112-113 main_cpu_list=0,1,112,113
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=slurm allowed=56-57,168-169 main_cpu_list=56,57,168,169
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;wait_all;-comm;wait_send;wait_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     4
+OMP thread map      0;1;112;113
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using wait_all method
+Wait Send using wait_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 01_async0_c4_waitall exit code: 0 =====
+
+===== 02_async0_c1_testall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 1 --cpu-bind=cores
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=slurm --cpu-bind=cores
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=slurm allowed=0,112 main_cpu_list=0
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=slurm allowed=56,168 main_cpu_list=56
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=slurm allowed=56,168 main_cpu_list=56
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=slurm allowed=0,112 main_cpu_list=0
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 02_async0_c1_testall exit code: 0 =====
+
+===== 03_async0_c4_testall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 4 --cpu-bind=cores
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=slurm --cpu-bind=cores
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=slurm allowed=56-57,168-169 main_cpu_list=56,57,168,169
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=slurm allowed=56-57,168-169 main_cpu_list=56,57,168,169
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=slurm allowed=0-1,112-113 main_cpu_list=0,1,112,113
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=slurm allowed=0-1,112-113 main_cpu_list=0,1,112,113
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     4
+OMP thread map      0;1;112;113
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 03_async0_c4_testall exit code: 0 =====
+
+===== 04_async1_c1_waitall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 1 --cpu-bind=none
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=manual taskset + split main/async CPUs
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=0 rank_async_cpu=0 async_cpu_list=0,1
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=1 rank_async_cpu=1 async_cpu_list=0,1
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=1 rank_async_cpu=1 async_cpu_list=0,1
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=0 rank_async_cpu=0 async_cpu_list=0,1
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;wait_all;-comm;wait_send;wait_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using wait_all method
+Wait Send using wait_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 04_async1_c1_waitall exit code: 0 =====
+
+===== 05_async1_c4_waitall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 4 --cpu-bind=none
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=manual taskset + split main/async CPUs
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=4,5,6 rank_async_cpu=7 async_cpu_list=3,7
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=0,1,2 rank_async_cpu=3 async_cpu_list=3,7
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=0,1,2 rank_async_cpu=3 async_cpu_list=3,7
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=4,5,6 rank_async_cpu=7 async_cpu_list=3,7
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;wait_all;-comm;wait_send;wait_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     3
+OMP thread map      0;1;2
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using wait_all method
+Wait Send using wait_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 05_async1_c4_waitall exit code: 0 =====
+
+===== 06_async1_c1_testall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 1 --cpu-bind=none
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=manual taskset + split main/async CPUs
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=0 rank_async_cpu=0 async_cpu_list=0,1
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=0 rank_async_cpu=0 async_cpu_list=0,1
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=1 rank_async_cpu=1 async_cpu_list=0,1
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=1 rank_async_cpu=1 async_cpu_list=0,1
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 06_async1_c1_testall exit code: 0 =====
+
+===== 07_async1_c4_testall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 4 --cpu-bind=none
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 3 -comm cutoff 250 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=manual taskset + split main/async CPUs
+rank=1 local_rank=1 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=4,5,6 rank_async_cpu=7 async_cpu_list=3,7
+rank=2 local_rank=0 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=0,1,2 rank_async_cpu=3 async_cpu_list=3,7
+rank=0 local_rank=0 host=cm4r13c01s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=0,1,2 rank_async_cpu=3 async_cpu_list=3,7
+rank=3 local_rank=1 host=cm4r13c04s08 bind_mode=manual allowed=0-223 total_cpus_per_rank=4 main_cpus_per_rank=3 main_cpu_list=4,5,6 rank_async_cpu=7 async_cpu_list=3,7
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;3;-comm;cutoff;250;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c01s08
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     3
+OMP thread map      0;1;2
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles          5
+Num vars            3
+ghost_widths        1        1        1
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 07_async1_c4_testall exit code: 0 =====

@@ -1,0 +1,44 @@
+
+===== 04_async1_c1_waitall =====
+launcher=srun -n 4 --ntasks-per-node=2 -c 1 --cpu-bind=none
+comb_cmd=./comb 512_512_512 -divide 2_2_1 -periodic 1_1_1 -ghost 8_8_8 -vars 3 -comm cutoff 500000 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -print_message_sizes -print_packing_sizes
+binding_mode=manual taskset + split main/async CPUs
+rank=2 local_rank=0 host=cm4r15c06s06 bind_mode=manual allowed=0-3,112-115 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=0 rank_async_cpu=0 async_cpu_list=0,1
+rank=3 local_rank=1 host=cm4r15c06s06 bind_mode=manual allowed=0-3,112-115 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=1 rank_async_cpu=1 async_cpu_list=0,1
+rank=1 local_rank=1 host=cm4r15c06s05 bind_mode=manual allowed=0-3,112-115 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=1 rank_async_cpu=1 async_cpu_list=0,1
+rank=0 local_rank=0 host=cm4r15c06s05 bind_mode=manual allowed=0-3,112-115 total_cpus_per_rank=1 main_cpus_per_rank=1 main_cpu_list=0 rank_async_cpu=0 async_cpu_list=0,1
+Comb version 0.3.1
+Args  ./comb;512_512_512;-divide;2_2_1;-periodic;1_1_1;-ghost;8_8_8;-vars;3;-comm;cutoff;500000;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;wait_all;-comm;wait_send;wait_all;-exec;enable;omp;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r15c06s05
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-mpi/2021.16.0-gcc-aa2ay3m/mpi/2021.16/bin/mpicxx"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 500000
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using wait_all method
+Wait Send using wait_all method
+Num cycles          5
+Num vars            3
+ghost_widths        8        8        8
+sizes             512      512      512
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map               256      256      512
+map               512      512         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 04_async1_c1_waitall exit code: 0 =====
