@@ -61,11 +61,16 @@ $$
 Then calculate the fraction of serial communication-plus-compute work removed
 by overlap:
 
-$$
-G_{overall} =
-\frac{T^{max}_{no\_mid} + T_{mid} - T^{max}_{with\_mid}}
-{T^{max}_{no\_mid} + T_{mid}}
-$$
+\[
+G_{\mathrm{overall}}
+=
+\frac{
+T_{\mathrm{no\_mid}}^{\max} + T_{\mathrm{mid}}
+- T_{\mathrm{with\_mid}}^{\max}
+}{
+T_{\mathrm{no\_mid}}^{\max} + T_{\mathrm{mid}}
+}
+\]
 
 where:
 
