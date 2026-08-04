@@ -53,13 +53,7 @@ The `mid-comm` timer records each injected-compute invocation, while
 `bench-comm` covers the complete five-cycle benchmark. First compute the
 per-rank injected-compute time over the whole benchmark:
 
-$$
-T_{mid}
-=
-\operatorname{avg}(\texttt{mid-comm})
-\times
-\frac{\operatorname{num}(\texttt{mid-comm})}{\text{ranks}}
-$$
+$$T_{\mathrm{mid}}=\mathrm{avg}(\texttt{mid-comm})\times\frac{\mathrm{num}(\texttt{mid-comm})}{\mathrm{ranks}}$$
 
 Then calculate the fraction of serial communication-plus-compute work removed
 by overlap:
