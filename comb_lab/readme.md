@@ -54,8 +54,11 @@ The `mid-comm` timer records each injected-compute invocation, while
 per-rank injected-compute time over the whole benchmark:
 
 $$
-T_{mid} = \operatorname{avg}(\texttt{mid-comm})
-	imes \frac{\operatorname{num}(\texttt{mid-comm})}{\text{ranks}}
+T_{mid}
+=
+\operatorname{avg}(\texttt{mid-comm})
+\times
+\frac{\operatorname{num}(\texttt{mid-comm})}{\text{ranks}}
 $$
 
 Then calculate the fraction of serial communication-plus-compute work removed
