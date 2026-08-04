@@ -1,0 +1,146 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# mpi_lab experiment config – Comb async scan on CoolMUC-4
+# Usage: python mpi_lab.py preview --config config/comb_cm4.yaml
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: comb_async_scan
+output_base: ../generated   # relative to this config file
+
+# ── Binary paths (edit here) ────────────────────────────────────────────────
+paths:
+  intelmpi_midcomm: &intelmpi_midcomm "/dss/dsshome1/08/ge63neh2/comb_with_compute/build_1_intelmpi_meshloop_OMP/bin/comb"
+  intelmpi_no_midcomm: &intelmpi_no_midcomm "/dss/dsshome1/08/ge63neh2/comb_with_compute/build_1_intelmpi_no_meshloop_OMP/bin/comb"
+  openmpi_midcomm: &openmpi_midcomm "~/comb_with_compute/build_2_openmpi_meshloop_omp/bin/comb"
+  openmpi_no_midcomm: &openmpi_no_midcomm "~/comb_with_compute/build_2_openmpi_no_meshloop_omp/bin/comb"
+  mpich_midcomm: &mpich_midcomm "~/comb_with_compute/build_3_mpich_meshloop_omp/bin/comb"
+  mpich_no_midcomm: &mpich_no_midcomm "~/comb_with_compute/build_3_mpich_no_meshloop_omp/bin/comb"
+
+# ── MPI implementations ───────────────────────────────────────────────────────
+mpi_impl:
+  intelmpi:
+    modules:
+      - stack/24.4.0
+      - intel-mpi/2021.16.0
+    modules_unload:
+      - openmpi/4.1.7-gcc13
+    binary: *intelmpi_midcomm
+    template: comb_intelmpi.slurm.j2
+    async_env: I_MPI_ASYNC_PROGRESS
+    async_threads_env: I_MPI_ASYNC_PROGRESS_THREADS
+    async_pin_env: I_MPI_ASYNC_PROGRESS_PIN
+    async_threads: 1
+
+  openmpi:
+    modules:
+      - openmpi/4.1.8-gcc13
+    binary: *openmpi_midcomm
+    template: comb_openmpi.slurm.j2
+    async_env: OMPI_MCA_mpi_yield_when_idle
+    async_env_on: "0"          # OpenMPI: 0 = don't yield = keep progressing
+
+  mpich:
+    modules:
+      - mpich/4.2.2-gcc13
+    binary: *mpich_midcomm
+    template: comb_mpich.slurm.j2
+    async_env: MPIR_CVAR_ASYNC_PROGRESS
+
+# ── Node / rank topology ──────────────────────────────────────────────────────
+topology:
+  - name: 1n2r_c24           # 1 node × 2 ranks/node, 24 cpus/rank used at runtime (112 cpus reserved/job)
+    nodes: 1
+    ntasks_per_node: 2
+    cpus_per_task: 56
+    divide: "2_1_1"
+
+  - name: 2n2r_c24           # 2 nodes × 1 rank/node, 24 cpus/rank used at runtime (112 cpus reserved/job)
+    nodes: 2
+    ntasks_per_node: 1
+    cpus_per_task: 56
+    divide: "2_1_1"
+
+  - name: 2n4r_c24           # 2 nodes × 2 ranks/node, 24 cpus/rank used at runtime (112 cpus reserved/job)
+    nodes: 2
+    ntasks_per_node: 2
+    cpus_per_task: 28
+    divide: "2_2_1"
+
+  - name: 4n4r_c24           # 4 nodes × 1 rank/node, 24 cpus/rank used at runtime (112 cpus reserved/job)
+    nodes: 4
+    ntasks_per_node: 1
+    cpus_per_task: 28
+    divide: "2_2_1"
+
+# ── Grid / halo message-size tiers ────────────────────────────────────────────
+grid:
+  # Keep a distinct key so historical generated/.../small results are not overwritten.
+  small_msg:
+    label: "small"
+    size: "32_32_32"
+    ghost: "1_1_1"
+    periodic: "1_1_1"
+    vars: 1
+    cutoff: 250
+
+  medium:
+    label: "medium"
+    size: "128_128_128"
+    ghost: "4_4_4"
+    periodic: "1_1_1"
+    vars: 3
+    cutoff: 250
+
+  large:
+    label: "large"
+    size: "256_256_256"
+    ghost: "4_4_4"
+    periodic: "1_1_1"
+    vars: 3
+    cutoff: 250
+
+# ── Compute injection mode ────────────────────────────────────────────────────
+compute_mode:
+  midcomm:
+    midcomm_flag: ""           # comb_with_compute enables mid-comm by default
+    enable_mock: true
+
+  no_midcomm:
+    midcomm_flag: ""
+    enable_mock: true
+    binary_overrides:
+      intelmpi: *intelmpi_no_midcomm
+      openmpi: *openmpi_no_midcomm
+      mpich: *mpich_no_midcomm
+
+# ── Communication options (shared across all cases) ───────────────────────────
+comm:
+  post_recv: wait_all
+  post_send: wait_all
+  # wait_recv / wait_send are varied per case below
+
+# ── SLURM resource config ─────────────────────────────────────────────────────
+slurm:
+  clusters: cm4
+  partition: cm4_std
+  qos: cm4_std
+  runtime_cpus_per_rank: 24
+  total_cpus_per_job: 112
+  time: "00:30:00"
+
+# ── Cases: inner loop inside each SLURM script ───────────────────────────────
+# Each entry = one run_case() call in the generated script.
+# Label is auto-generated; for Intel async cases you may also set async_threads.
+cases:
+  - {async: 0, omp_threads: 1,  wait_mode: wait_all}
+  - {async: 0, omp_threads: 24, wait_mode: wait_all}
+  - {async: 0, omp_threads: 1,  wait_mode: test_all}
+  - {async: 0, omp_threads: 24, wait_mode: test_all}
+  - {async: 1, omp_threads: 1,  wait_mode: wait_all}
+  - {async: 1, omp_threads: 12, async_threads: 12, wait_mode: wait_all}
+  - {async: 1, omp_threads: 23, wait_mode: wait_all}
+  - {async: 1, omp_threads: 1,  wait_mode: test_all}
+  - {async: 1, omp_threads: 12, async_threads: 12, wait_mode: test_all}
+  - {async: 1, omp_threads: 23, wait_mode: test_all}
+
+# ── Exclusions ────────────────────────────────────────────────────────────────
+exclude: []

@@ -1,0 +1,466 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>mpi_lab web gui</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#f4f6fb;margin:0} .w{max-width:1320px;margin:20px auto;background:#fff;padding:14px;border-radius:12px}
+.g{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:start} .c{border:1px solid #c7d2e6;border-radius:8px;padding:6px;box-shadow:0 2px 8px rgba(24,39,75,0.06);background:#fff}
+.panel{border:1px solid #b7c5df;border-radius:12px;padding:12px;background:linear-gradient(180deg,#ffffff 0%,#f8fbff 100%);box-shadow:0 10px 28px rgba(24,39,75,0.10), inset 0 1px 0 rgba(255,255,255,0.9)}
+.g .c h4{margin:0 0 6px 0;font-size:14px}
+.g .c label{font-size:13px;line-height:1.35;margin-bottom:2px}
+button{padding:8px 12px;border-radius:8px;border:0;background:#0b63f6;color:#fff;cursor:pointer}
+button.danger{background:#d9363e}
+button.open-btn{padding:3px 6px;background:#f0f0f0;color:#333;border:1px solid #ccc;border-radius:6px;font-size:14px}
+button.open-btn:hover{background:#d0eaff}
+button.copy-btn{padding:3px 6px;background:#f0f0f0;color:#333;border:1px solid #ccc;border-radius:6px;font-size:14px}
+button.copy-btn:hover{background:#fff4d0}
+.msg{margin:10px 0;padding:8px;background:#e8f6ea;border:1px solid #9bcf9f;border-radius:8px}
+.toolbar button{margin-right:8px} table{width:100%;border-collapse:collapse} th,td{border:1px solid #d9dfee;padding:6px 8px;text-align:left;vertical-align:top}
+th.col-mini,td.col-mini{white-space:nowrap}
+.filters{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:8px;margin:10px 0}
+.filters .c{padding:6px}
+.filters label{display:block;font-size:12px;color:#444;margin-bottom:4px}
+.filters select,.filters input{width:100%;box-sizing:border-box}
+.row-hidden{display:none}
+@media(max-width:980px){.w{max-width:100%} .g{grid-template-columns:1fr 1fr}} @media(max-width:560px){.g{grid-template-columns:1fr}}
+</style></head>
+<body><div class="w">
+<h2>mpi_lab script generator + manager (web)</h2>
+<div class="quickguide" style="background:#eef4ff;border:1px solid #b8cdf8;border-radius:10px;padding:12px 16px;margin-bottom:16px">
+<h3 style="margin:0 0 8px 0">Quick Guide</h3>
+<ul style="margin:0;padding-left:18px;line-height:1.9">
+<li><strong>MPI</strong>: Select one or more MPI implementations to include.</li>
+<li><strong>Topology</strong>: Choose node/rank layout. Msg Size labels update dynamically based on your selection.</li>
+<li><strong>Msg Size</strong>: Three grid sizes sorted small &#8594; medium &#8594; large. Labels show the X/Y/Z face message sizes for the selected topology.</li>
+<li><strong>Compute mode</strong>: Scripts are automatically generated for <em>both</em> compute modes (<code>midcomm</code> and <code>no_midcomm</code>) &mdash; no manual selection needed.</li>
+<li><strong>Cluster</strong>: Choose one or both target partitions for script generation.</li>
+</ul>
+<table style="width:100%;border-collapse:collapse;margin-top:12px;font-size:13px">
+<thead>
+<tr>
+<th style="border:1px solid #b8cdf8;padding:6px 8px;text-align:left">MPI</th>
+<th style="border:1px solid #b8cdf8;padding:6px 8px;text-align:left">Reference threshold</th>
+<th style="border:1px solid #b8cdf8;padding:6px 8px;text-align:left">Env vars</th>
+<th style="border:1px solid #b8cdf8;padding:6px 8px;text-align:left">Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">Intel MPI</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">4,194,304</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">I_MPI_EAGER_THRESHOLD / I_MPI_SHM_EAGER_THRESHOLD</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">Reference only; scripts do not set it</td>
+</tr>
+<tr>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">Open MPI</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">vader=4,096; tcp=65,536</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">OMPI_MCA_btl_vader_eager_limit / OMPI_MCA_btl_tcp_eager_limit</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">Reference only; scripts do not set it</td>
+</tr>
+<tr>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">MPICH</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">262,144</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">MPIR_CVAR_CH4_OFI_EAGER_MAX_MSG_SIZE</td>
+<td style="border:1px solid #b8cdf8;padding:6px 8px">Reference only; scripts do not set it</td>
+</tr>
+</tbody>
+</table>
+<div style="margin-top:8px;color:#555;font-size:12px">This table is reference-only. The generated scripts do not set these MPI thresholds.</div>
+</div>
+<form method="post">
+<div class="c panel" style="margin-top:12px">
+<h4 style="margin:0 0 10px 0">Config</h4>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<label>Config <select name="config"><option value="/dss/dsshome1/08/ge63neh2/comb_lab/config/comb_cm4.yaml" selected>/dss/dsshome1/08/ge63neh2/comb_lab/config/comb_cm4.yaml</option></select></label>
+<label><input type="checkbox" name="dry_run" value="1"> Dry run</label>
+<label style="flex:1 1 360px">Output override <input type="text" name="output" style="width:100%;box-sizing:border-box;margin-top:4px"></label>
+</div>
+<div class="g" style="margin-top:10px">
+<div class="c"><h4>Cluster</h4><label><input type="checkbox" name="cluster" value="cm4_std" > cm4_std</label><br>
+<label><input type="checkbox" name="cluster" value="cm4_inter" > cm4_inter</label><br></div>
+<div class="c"><h4>MPI</h4><label><input type="checkbox" name="mpi" value="intelmpi" > intelmpi</label><br>
+<label><input type="checkbox" name="mpi" value="openmpi" > openmpi</label><br>
+<label><input type="checkbox" name="mpi" value="mpich" > mpich</label><br></div>
+<div class="c"><h4>Topology</h4><label><input type="checkbox" name="topology" value="1n2r_c24" > 1n2r_c24</label><br>
+<label><input type="checkbox" name="topology" value="2n2r_c24" > 2n2r_c24</label><br>
+<label><input type="checkbox" name="topology" value="2n4r_c24" > 2n4r_c24</label><br>
+<label><input type="checkbox" name="topology" value="4n4r_c24" > 4n4r_c24</label><br></div>
+<div class="c"><h4>Msg Size</h4><label><input type="checkbox" name="grid" value="small"> <span>small</span> <span id="gsize_small" style="color:#555;font-size:11px"></span></label><br>
+<label><input type="checkbox" name="grid" value="medium"> <span>medium</span> <span id="gsize_medium" style="color:#555;font-size:11px"></span></label><br>
+<label><input type="checkbox" name="grid" value="big"> <span>big</span> <span id="gsize_big" style="color:#555;font-size:11px"></span></label><br></div>
+<div class="c" style="grid-column:1/-1"><h4>Test Cases</h4><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0 14px"><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>00</strong> <span style='display:inline-block;min-width:48px'>no_async</span> <span style='display:inline-block;min-width:72px'>1</span> <span style='color:#555'>wait_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>01</strong> <span style='display:inline-block;min-width:48px'>no_async</span> <span style='display:inline-block;min-width:72px'>24</span> <span style='color:#555'>wait_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>02</strong> <span style='display:inline-block;min-width:48px'>no_async</span> <span style='display:inline-block;min-width:72px'>1</span> <span style='color:#555'>test_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>03</strong> <span style='display:inline-block;min-width:48px'>no_async</span> <span style='display:inline-block;min-width:72px'>24</span> <span style='color:#555'>test_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>04</strong> <span style='display:inline-block;min-width:48px'>async</span> <span style='display:inline-block;min-width:72px'>1+1</span> <span style='color:#555'>wait_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>05</strong> <span style='display:inline-block;min-width:48px'>async</span> <span style='display:inline-block;min-width:72px'>12+12</span> <span style='color:#555'>wait_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>06</strong> <span style='display:inline-block;min-width:48px'>async</span> <span style='display:inline-block;min-width:72px'>23+1</span> <span style='color:#555'>wait_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>07</strong> <span style='display:inline-block;min-width:48px'>async</span> <span style='display:inline-block;min-width:72px'>1+1</span> <span style='color:#555'>test_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>08</strong> <span style='display:inline-block;min-width:48px'>async</span> <span style='display:inline-block;min-width:72px'>12+12</span> <span style='color:#555'>test_all</span></div><div style='padding:4px 0;border-bottom:1px dashed #e2e7f3'><strong>09</strong> <span style='display:inline-block;min-width:48px'>async</span> <span style='display:inline-block;min-width:72px'>23+1</span> <span style='color:#555'>test_all</span></div></div></div>
+</div>
+<div class="toolbar" style="margin-top:12px">
+<button type="submit" name="action" value="generate">Generate scripts</button>
+</div>
+</div>
+
+<div class="c panel" style="margin-top:12px">
+<h4 style="margin:0 0 10px 0">Salloc Helper</h4>
+<div class="filters" style="grid-template-columns:repeat(6,minmax(120px,1fr))">
+<div class="c"><label>Helper Topology</label><select id="salloc_topology"></select></div>
+<div class="c"><label>Nodes</label><input type="number" id="salloc_nodes" min="1" value="1"></div>
+<div class="c"><label>Ranks</label><input type="number" id="salloc_ntasks" min="1" value="1" readonly style="background:#f6f8fc;color:#4b5567"></div>
+<div class="c"><label>Ranks / node</label><input type="number" id="salloc_ntasks_per_node" min="1" value="1"></div>
+<div class="c"><label>CPUs / rank</label><input type="number" id="salloc_cpus_per_task" min="1" value="1"></div>
+<div class="c"><label>Time</label><input type="text" id="salloc_time" value="00:30:00"></div>
+</div>
+<div class="toolbar" style="margin-top:10px">
+<button type="button" onclick="copySallocCmd('cm4_inter')">Copy salloc inter</button>
+</div>
+<div style="margin-top:6px;color:#555;font-size:12px">The helper uses the topology selected in this panel. If you checked multiple topologies above, choose one here; nodes, ranks/node, total ranks, and CPUs/rank are then auto-filled, and time defaults to 30 minutes.</div>
+</div>
+
+<div class="c panel" style="margin-top:12px">
+<h4 style="margin:0 0 10px 0">Generated Scripts</h4>
+<div class="toolbar" style="margin-top:8px">
+<button type="submit" name="action" value="refresh">Refresh script list</button>
+</div>
+<div class="filters">
+<div class="c"><label>Cluster</label><select id="f_cluster"><option value="">All</option><option value="cm4_inter">cm4_inter</option></select></div>
+<div class="c"><label>MPI</label><select id="f_mpi"><option value="">All</option><option value="openmpi">openmpi</option></select></div>
+<div class="c"><label>Topology</label><select id="f_topology"><option value="">All</option><option value="2n2r_c24">2n2r_c24</option></select></div>
+<div class="c"><label>Msg Size</label><select id="f_size"><option value="">All</option><option value="big">big</option></select></div>
+<div class="c"><label>Compute</label><select id="f_compute"><option value="">All</option><option value="midcomm">midcomm</option><option value="no_midcomm">no_midcomm</option></select></div>
+<div class="c"><label>Path contains</label><input id="f_keyword" type="text" placeholder="intelmpi / cm4_inter / ..."></div>
+</div>
+<div class="toolbar" style="margin-bottom:8px">
+<button type="button" onclick="applyFilters()">Apply filter</button>
+<button type="button" onclick="resetFilters()">Reset filter</button>
+<button type="button" onclick="selectVisible(true)">Select visible</button>
+<button type="button" onclick="selectVisible(false)">Clear visible</button>
+<label style="margin-left:8px"><input type="checkbox" id="select_all_box"> Select all rows</label>
+<button type="submit" name="action" value="delete_selected" class="danger" onclick="return confirm('Delete selected scripts and empty parent directories?')">Delete selected</button>
+</div>
+<div style="margin:4px 0 8px 0;color:#444"><small id="visible_count">0 visible / 0 total</small></div>
+<table>
+<thead>
+<tr>
+<th style="width:40px"></th>
+<th style="width:40px"></th>
+<th class="col-mini">Cluster</th>
+<th class="col-mini">MPI</th>
+<th class="col-mini">Topology</th>
+<th class="col-mini">Msg Size</th>
+<th class="col-mini">Compute</th>
+<th style="width:160px"></th>
+</tr>
+</thead>
+<tbody>
+<tr class='script-row' data-cluster='cm4_inter' data-mpi='openmpi' data-topology='2n2r_c24' data-size='big' data-compute='no_midcomm' data-rel='generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm/run.sh'><td><input type="checkbox" name="script" value="/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm/run.sh"></td><td>cm4_inter</td><td>openmpi</td><td>2n2r_c24</td><td>big</td><td>no_midcomm</td><td style='white-space:nowrap'><button type='button' class='open-btn' onclick="openInCode('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm/run.sh')" title='Open in VS Code'>&#128065;</button>&nbsp;<button type='button' class='copy-btn' onclick="copyPath('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm/run.sh')" title='Copy script path'>📋</button>&nbsp;<button type='button' class='copy-btn' onclick="copyStdCmd('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm/run.sh')" title='Copy sbatch command for cm4_std'>std</button>&nbsp;<button type='button' class='copy-btn' onclick="copyInterCmd('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm/run.sh')" title='Copy interactive bash command for cm4_inter'>inter</button></td></tr>
+<tr class='script-row' data-cluster='cm4_inter' data-mpi='openmpi' data-topology='2n2r_c24' data-size='big' data-compute='midcomm' data-rel='generated/cm4_inter/openmpi/2n2r_c24/big/midcomm/run.sh'><td><input type="checkbox" name="script" value="/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/midcomm/run.sh"></td><td>cm4_inter</td><td>openmpi</td><td>2n2r_c24</td><td>big</td><td>midcomm</td><td style='white-space:nowrap'><button type='button' class='open-btn' onclick="openInCode('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/midcomm/run.sh')" title='Open in VS Code'>&#128065;</button>&nbsp;<button type='button' class='copy-btn' onclick="copyPath('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/midcomm/run.sh')" title='Copy script path'>📋</button>&nbsp;<button type='button' class='copy-btn' onclick="copyStdCmd('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/midcomm/run.sh')" title='Copy sbatch command for cm4_std'>std</button>&nbsp;<button type='button' class='copy-btn' onclick="copyInterCmd('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/midcomm/run.sh')" title='Copy interactive bash command for cm4_inter'>inter</button></td></tr>
+</tbody>
+</table>
+<div class="toolbar" style="margin-top:10px">
+<button type="submit" name="action" value="submit_selected">Submit selected (sbatch)</button>
+<button type="submit" name="action" value="run_selected">Run selected (bash)</button>
+</div>
+</div>
+
+<div class="c panel" style="margin-top:12px">
+<h4 style="margin:0 0 10px 0">Output</h4>
+<div class="toolbar" style="margin-top:8px">
+<button type="submit" name="action" value="refresh_outputs">Refresh output list</button>
+</div>
+<div style="margin:4px 0 8px 0;color:#444"><small>3 result directories</small></div>
+<div class="toolbar" style="margin-bottom:8px">
+<button type="button" onclick="selectAllOutputs(true)">Select all</button>
+<button type="button" onclick="selectAllOutputs(false)">Clear all</button>
+<label style="margin-left:8px"><input type="checkbox" id="select_all_outputs_box"> Select all rows</label>
+<button type="submit" name="action" value="delete_selected_outputs" class="danger" onclick="return confirm('Delete selected output directories and empty parent directories?')">Delete selected</button>
+</div>
+<table>
+<thead>
+<tr>
+<th style="width:40px"></th>
+<th class="col-mini">Cluster</th>
+<th class="col-mini">MPI</th>
+<th class="col-mini">Topology</th>
+<th class="col-mini">Msg Size</th>
+<th class="col-mini">Compute</th>
+<th>Result Dir</th>
+<th class="col-mini">Output</th>
+<th style="width:60px"></th>
+</tr>
+</thead>
+<tbody>
+<tr class='output-row'><td><input type="checkbox" name="output_dir" value="/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm"></td><td>cm4_inter</td><td>openmpi</td><td>2n2r_c24</td><td>big</td><td>no_midcomm</td><td>generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm</td><td>10 files</td><td style='white-space:nowrap'><button type='button' class='open-btn' onclick="openInCode('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm')" title='Open result directory'>&#128065;</button>&nbsp;<button type='button' class='copy-btn' onclick="copyPath('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/2n2r_c24/big/no_midcomm')" title='Copy result directory'>📋</button></td></tr>
+<tr class='output-row'><td><input type="checkbox" name="output_dir" value="/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/intelmpi/2n2r_c24/big/no_midcomm"></td><td>cm4_inter</td><td>intelmpi</td><td>2n2r_c24</td><td>big</td><td>no_midcomm</td><td>generated/cm4_inter/intelmpi/2n2r_c24/big/no_midcomm</td><td>50 files</td><td style='white-space:nowrap'><button type='button' class='open-btn' onclick="openInCode('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/intelmpi/2n2r_c24/big/no_midcomm')" title='Open result directory'>&#128065;</button>&nbsp;<button type='button' class='copy-btn' onclick="copyPath('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/intelmpi/2n2r_c24/big/no_midcomm')" title='Copy result directory'>📋</button></td></tr>
+<tr class='output-row'><td><input type="checkbox" name="output_dir" value="/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_std/intelmpi/2n2r_c28/big/midcomm"></td><td>cm4_std</td><td>intelmpi</td><td>2n2r_c28</td><td>big</td><td>midcomm</td><td>generated/cm4_std/intelmpi/2n2r_c28/big/midcomm</td><td>8 files</td><td style='white-space:nowrap'><button type='button' class='open-btn' onclick="openInCode('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_std/intelmpi/2n2r_c28/big/midcomm')" title='Open result directory'>&#128065;</button>&nbsp;<button type='button' class='copy-btn' onclick="copyPath('/dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_std/intelmpi/2n2r_c28/big/midcomm')" title='Copy result directory'>📋</button></td></tr>
+</tbody>
+</table>
+</div>
+</form>
+
+<ul></ul>
+</div>
+<script>const GRID_DATA = {"small": {"size": [128, 128, 128], "ghost": [4, 4, 4], "vars": 3}, "medium": {"size": [256, 256, 256], "ghost": [4, 4, 4], "vars": 3}, "big": {"size": [512, 512, 512], "ghost": [8, 8, 8], "vars": 3}};
+const TOPO_DATA = {"1n2r_c24": {"divide": [2, 1, 1], "nodes": 1, "ntasks_per_node": 2, "cpus_per_task": 56, "ntasks": 2}, "2n2r_c24": {"divide": [2, 1, 1], "nodes": 2, "ntasks_per_node": 1, "cpus_per_task": 56, "ntasks": 2}, "2n4r_c24": {"divide": [2, 2, 1], "nodes": 2, "ntasks_per_node": 2, "cpus_per_task": 28, "ntasks": 4}, "4n4r_c24": {"divide": [2, 2, 1], "nodes": 4, "ntasks_per_node": 1, "cpus_per_task": 28, "ntasks": 4}};
+const SALLOC_DEFAULT_TIME = "00:30:00";
+
+function fmtBytes(n) {
+    if (n >= 1048576) return (n / 1048576).toFixed(1) + ' MB';
+    if (n >= 1024) return (n / 1024).toFixed(0) + ' KB';
+    return n + ' B';
+}
+
+function updateMsgSizeLabels() {
+    const checked = Array.from(document.querySelectorAll('input[name="topology"]:checked')).map(e => e.value);
+    const key = checked.length ? checked[0] : Object.keys(TOPO_DATA)[0];
+    const t = TOPO_DATA[key];
+    if (!t) return;
+    for (const [gk, g] of Object.entries(GRID_DATA)) {
+        const el = document.getElementById('gsize_' + gk);
+        if (!el) continue;
+        const loc = g.size.map((s, i) => Math.floor(s / t.divide[i]));
+        const faceBytes = {
+            X: loc[1] * loc[2] * g.ghost[0] * 8 * g.vars,
+            Y: loc[0] * loc[2] * g.ghost[1] * 8 * g.vars,
+            Z: loc[0] * loc[1] * g.ghost[2] * 8 * g.vars,
+        };
+        el.textContent = '(X=' + fmtBytes(faceBytes.X) + ', Y=' + fmtBytes(faceBytes.Y) + ', Z=' + fmtBytes(faceBytes.Z) + ')';
+    }
+}
+
+function updateSallocTaskCount() {
+    const nodes = parseInt(document.getElementById('salloc_nodes')?.value || '0', 10);
+    const ntpn = parseInt(document.getElementById('salloc_ntasks_per_node')?.value || '0', 10);
+    const ntasksEl = document.getElementById('salloc_ntasks');
+    if (!ntasksEl || !Number.isFinite(nodes) || !Number.isFinite(ntpn)) return;
+    ntasksEl.value = String(Math.max(nodes, 0) * Math.max(ntpn, 0));
+}
+
+function getSelectedTopologyKeys() {
+    const checked = Array.from(document.querySelectorAll('input[name="topology"]:checked')).map(e => e.value);
+    return checked.length ? checked : Object.keys(TOPO_DATA);
+}
+
+function refreshSallocTopologyChoices() {
+    const selectEl = document.getElementById('salloc_topology');
+    if (!selectEl) return;
+    const options = getSelectedTopologyKeys();
+    const current = selectEl.value;
+    selectEl.innerHTML = '';
+    for (const key of options) {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = key;
+        if (key === current) opt.selected = true;
+        selectEl.appendChild(opt);
+    }
+    if (!options.includes(current) && options.length) {
+        selectEl.value = options[0];
+    }
+}
+
+function updateSallocDefaults() {
+    const selectEl = document.getElementById('salloc_topology');
+    const key = selectEl?.value || getSelectedTopologyKeys()[0];
+    const t = TOPO_DATA[key];
+    if (!t) return;
+    const nodesEl = document.getElementById('salloc_nodes');
+    const ntpnEl = document.getElementById('salloc_ntasks_per_node');
+    const cptEl = document.getElementById('salloc_cpus_per_task');
+    const timeEl = document.getElementById('salloc_time');
+    if (nodesEl) nodesEl.value = String(t.nodes || 1);
+    if (ntpnEl) ntpnEl.value = String(t.ntasks_per_node || 1);
+    if (cptEl) cptEl.value = String(t.cpus_per_task || 1);
+    if (timeEl && !timeEl.value) timeEl.value = SALLOC_DEFAULT_TIME;
+    updateSallocTaskCount();
+}
+
+document.querySelectorAll('input[name="topology"]').forEach(cb => {
+    cb.addEventListener('change', updateMsgSizeLabels);
+    cb.addEventListener('change', () => {
+        refreshSallocTopologyChoices();
+        updateSallocDefaults();
+    });
+});
+document.getElementById('salloc_topology')?.addEventListener('change', updateSallocDefaults);
+document.getElementById('salloc_nodes')?.addEventListener('input', updateSallocTaskCount);
+document.getElementById('salloc_ntasks_per_node')?.addEventListener('input', updateSallocTaskCount);
+updateMsgSizeLabels();
+refreshSallocTopologyChoices();
+updateSallocDefaults();</script>
+<script>
+const scriptRows = Array.from(document.querySelectorAll('tr.script-row'));
+const outputRows = Array.from(document.querySelectorAll('tr.output-row'));
+let dragSelecting = false;
+let dragTargetState = false;
+let lastClicked = null;
+
+function isVisibleRow(row) {
+    return !row.classList.contains('row-hidden');
+}
+
+function setVisibleCount() {
+    const visible = scriptRows.filter(isVisibleRow).length;
+    const total = scriptRows.length;
+    const el = document.getElementById('visible_count');
+    if (el) el.textContent = visible + ' visible / ' + total + ' total';
+}
+
+function applyFilters() {
+    const fc = document.getElementById('f_cluster')?.value || '';
+    const fm = document.getElementById('f_mpi')?.value || '';
+    const ft = document.getElementById('f_topology')?.value || '';
+    const fs = document.getElementById('f_size')?.value || '';
+    const fcp = document.getElementById('f_compute')?.value || '';
+    const fk = (document.getElementById('f_keyword')?.value || '').trim().toLowerCase();
+
+    for (const row of scriptRows) {
+        const pass =
+            (!fc || row.dataset.cluster === fc) &&
+            (!fm || row.dataset.mpi === fm) &&
+            (!ft || row.dataset.topology === ft) &&
+            (!fs || row.dataset.size === fs) &&
+            (!fcp || row.dataset.compute === fcp) &&
+            (!fk || (row.dataset.rel || '').toLowerCase().includes(fk));
+        row.classList.toggle('row-hidden', !pass);
+    }
+    setVisibleCount();
+}
+
+function resetFilters() {
+    ['f_cluster', 'f_mpi', 'f_topology', 'f_size', 'f_compute', 'f_keyword'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.value = '';
+    });
+    applyFilters();
+}
+
+function selectVisible(state) {
+    for (const row of scriptRows) {
+        if (!isVisibleRow(row)) continue;
+        const box = row.querySelector('input[name="script"]');
+        if (box) box.checked = state;
+    }
+}
+
+document.getElementById('select_all_box')?.addEventListener('change', (e) => {
+    const state = !!e.target.checked;
+    for (const row of scriptRows) {
+        const box = row.querySelector('input[name="script"]');
+        if (box) box.checked = state;
+    }
+});
+
+for (const id of ['f_cluster', 'f_mpi', 'f_topology', 'f_size', 'f_compute']) {
+    document.getElementById(id)?.addEventListener('change', applyFilters);
+}
+document.getElementById('f_keyword')?.addEventListener('input', applyFilters);
+
+for (const row of scriptRows) {
+    const box = row.querySelector('input[name="script"]');
+    if (!box) continue;
+
+    box.addEventListener('click', (e) => {
+        if (e.shiftKey && lastClicked) {
+            const all = scriptRows.map((r) => r.querySelector('input[name="script"]')).filter(Boolean);
+            const i1 = all.indexOf(lastClicked);
+            const i2 = all.indexOf(box);
+            if (i1 >= 0 && i2 >= 0) {
+                const start = Math.min(i1, i2);
+                const end = Math.max(i1, i2);
+                for (let i = start; i <= end; i++) all[i].checked = box.checked;
+            }
+        }
+        lastClicked = box;
+    });
+
+    box.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        dragSelecting = true;
+        dragTargetState = null;
+    });
+
+    box.addEventListener('change', () => {
+        if (dragSelecting && dragTargetState === null) {
+            dragTargetState = box.checked;
+        }
+    });
+
+    box.addEventListener('mouseenter', (e) => {
+        if (!dragSelecting) return;
+        if (!(e.buttons & 1)) return;
+        if (dragTargetState === null) return;
+        box.checked = dragTargetState;
+    });
+}
+
+document.addEventListener('mouseup', () => {
+    dragSelecting = false;
+});
+
+function selectAllOutputs(state) {
+    for (const row of outputRows) {
+        const box = row.querySelector('input[name="output_dir"]');
+        if (box) box.checked = state;
+    }
+}
+
+document.getElementById('select_all_outputs_box')?.addEventListener('change', (e) => {
+    selectAllOutputs(!!e.target.checked);
+});
+
+applyFilters();
+
+function openInCode(path) {
+    fetch('/open?path=' + encodeURIComponent(path))
+        .then(r => r.json())
+        .then(d => { if (!d.ok) alert('Failed to open: ' + (d.error || 'unknown error')); })
+        .catch(() => alert('Request failed'));
+}
+
+function shellQuote(value) {
+    return "'" + String(value).replace(/'/g, "'\''") + "'";
+}
+
+function copySallocCmd(profile) {
+    const nodes = document.getElementById('salloc_nodes')?.value || '1';
+    const ntasks = document.getElementById('salloc_ntasks')?.value || '1';
+    const ntpn = document.getElementById('salloc_ntasks_per_node')?.value || '1';
+    const cpt = document.getElementById('salloc_cpus_per_task')?.value || '1';
+    const time = document.getElementById('salloc_time')?.value || SALLOC_DEFAULT_TIME;
+    const machine = profile === 'cm4_inter' ? 'inter' : 'cm4';
+    const partition = profile === 'cm4_inter' ? 'cm4_inter' : 'cm4_std';
+    const cmd = 'salloc -M ' + machine + ' -p ' + partition +
+        ' -N ' + nodes + ' -n ' + ntasks +
+        ' --ntasks-per-node=' + ntpn + ' -c ' + cpt +
+        ' -t ' + time;
+    navigator.clipboard.writeText(cmd).then(() => {
+        alert('Copied: ' + cmd);
+    }).catch(() => {
+        alert('Failed to copy');
+    });
+}
+
+function copyStdCmd(path) {
+    const cmd = 'sbatch ' + shellQuote(path);
+    navigator.clipboard.writeText(cmd).then(() => {
+        alert('Copied: ' + cmd);
+    }).catch(() => {
+        alert('Failed to copy');
+    });
+}
+
+function copyInterCmd(path) {
+    const slash = path.lastIndexOf('/');
+    const dir = slash >= 0 ? path.slice(0, slash) : '.';
+    const file = slash >= 0 ? path.slice(slash + 1) : path;
+    const cmd = 'cd ' + shellQuote(dir) + ' && bash ' + shellQuote(file);
+    navigator.clipboard.writeText(cmd).then(() => {
+        alert('Copied: ' + cmd);
+    }).catch(() => {
+        alert('Failed to copy');
+    });
+}
+
+function copyPath(path) {
+    navigator.clipboard.writeText(path).then(() => {
+        alert('Copied: ' + path);
+    }).catch(() => {
+        alert('Failed to copy');
+    });
+}
+</script>
+</div></body></html>
