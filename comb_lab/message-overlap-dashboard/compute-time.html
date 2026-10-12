@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>计算时间与 MPI overlap</title><link rel="stylesheet" href="styles.css">
+<style>.actions{flex-wrap:wrap}.chart-stage{height:480px}header{flex-wrap:wrap}.note{line-height:1.7}td,th{white-space:nowrap}</style>
+</head>
+<body><main>
+<header><div><p class="eyebrow">CM4_INTER · INTEL MPI · 2N2R_C24</p><h1>计算时间与 overlap</h1><p class="subtitle">0.5T、Tcomm（原始配置）与 2T 对比 · 柱形：Overlap；同一消息大小内的折线：隐藏 Tcomm 百分比；同色代表同一计算时间组；浅色柱形与空心点区分指标</p></div>
+<div class="actions">
+<label>Case <select id="case"></select></label>
+<label>执行策略 <select id="policy"><option>seq/seq/seq</option><option>omp/seq/seq</option><option>omp/omp/seq</option><option>omp/omp/omp</option></select></label>
+<label>纵轴指标 <select id="metric"><option value="combined" selected>Overlap + 隐藏 Tcomm (%)</option><option value="overlap">Overlap (%)</option><option value="hidden_us">等待时间减少量（μs）</option><option value="hidden_tcomm">隐藏通信量（×Tcomm）</option></select></label>
+<button id="export" type="button">导出 PNG</button>
+</div></header>
+<p class="source note">Overlap = (no_midcomm wait-recv 均值 − midcomm wait-recv 均值) / 实测 mid-comm 均值 × 100%。<br>保留全部峰值和负值。n 为当前 Case 的有效配对 run 数；缺失项不作为 0 参与统计。0.5T / Tcomm / 2T 沿用实验分组标签。</p>
+<section class="chart-panel"><div class="chart-wrap"><div class="chart-stage"><canvas id="chart" role="img" aria-label="不同消息大小下 0.5T 与 2T 的 overlap 与隐藏通信百分比对比图"></canvas></div></div></section>
+<p class="source note">分母为计算时间，百分比下降不一定意味着隐藏的绝对通信时间减少。不同消息大小之间不连线。左右百分比轴使用相同刻度。图中不显示极差线；min–max 保留在统计表中。三组均从原始计时逐 run 计算。</p>
+<p class="source">Tcomm 组使用历史无 polling 原始配置，按实测计算时间重新计算 overlap；实际目标时间和 cycles 见表格。18.06 KiB 的原始目标为 30 μs，与 0.5T / 2T 的 18.5 / 74 μs 并非严格倍数关系；各组样本数及 cycles 也可能不同。</p>
+<p class="source">等待时间减少量 Δwait = 无计算 wait-recv − 有计算 wait-recv；隐藏通信量 = Δwait / 固定 Tcomm。Tcomm 取原始组 Case 06 无计算时 MPI wait-recv 减去 Mock wait-recv 的逐 run 均值，同一消息大小和执行策略下，三个计算时间组及各 Case 共用。该指标是等待时间减少量的估计，保留负值和超过 1 的值；基准缺失或非正时不绘制。</p><p class="source" id="baseline"></p>
+<h2 id="table-title">统计数据</h2><div class="table-wrap"><table><thead><tr><th>Payload</th><th>计算时间组</th><th>有效 / 请求 runs</th><th>Min</th><th>Mean</th><th>Max</th><th>有效 run</th><th>缺失 run</th><th id="hidden-head">隐藏 Tcomm mean (%)</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p class="source"><a href="index.html">消息大小 dashboard</a> · <a href="../实验记录/计算时间vs（intelmpi).md">实验记录</a> · <a href="compute-time-summary.csv" download>汇总 CSV</a> · <a href="compute-time-runs.csv" download>逐 run CSV</a> · <a href="compute-time-overlap.png?v=c86d8a709c7f">Case 01 / 06 PNG</a> · <a href="compute-time-overlap.pdf?v=cae94c176fdb">PDF</a></p>
+</main><script src="vendor/chart.umd.min.js"></script><script src="compute-time-data.js?v=a6b024571e55"></script><script src="compute-time.js?v=d9af10853517"></script></body></html>

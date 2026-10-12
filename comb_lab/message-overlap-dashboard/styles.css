@@ -1,0 +1,155 @@
+:root {
+  color-scheme: light;
+  --ink: #17202a;
+  --muted: #68737d;
+  --paper: #f7f8f5;
+  --panel: #ffffff;
+  --grid: #dfe4df;
+  --teal: #087f73;
+  --teal-soft: rgba(8, 127, 115, 0.14);
+  --coral: #e25d3f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    linear-gradient(rgba(23, 32, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 32, 42, 0.035) 1px, transparent 1px),
+    var(--paper);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: "IBM Plex Sans", "Aptos", sans-serif;
+}
+
+main {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 48px 0 32px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #cfd5d0;
+}
+
+.eyebrow {
+  margin: 0 0 10px;
+  color: var(--teal);
+  font: 600 12px/1.2 "IBM Plex Mono", monospace;
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 32px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+button,
+select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #bfc7c1;
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--ink);
+  font: 600 13px/1 "IBM Plex Sans", "Aptos", sans-serif;
+  cursor: pointer;
+}
+
+button:hover { border-color: var(--teal); color: var(--teal); }
+
+.actions { display: flex; align-items: flex-end; gap: 10px; }
+header > div { min-width: 0; }
+.actions { flex-wrap: wrap; }
+button svg { width: 18px; height: 18px; }
+[hidden] { display: none !important; }
+.second-key { width: 22px; border-top: 3px dashed var(--coral); }
+#comparison-section { margin-top: 28px; }
+h2 { font-size: 20px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+th, td { padding: 10px 12px; border-bottom: 1px solid var(--grid); text-align: right; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+td.run-list { min-width: 190px; max-width: 260px; white-space: normal; overflow-wrap: anywhere; text-align: left; line-height: 1.5; }
+th { font-size: 12px; color: var(--muted); }
+.source { font-size: 13px; }
+a { color: var(--teal); }
+.actions label { display: grid; gap: 7px; color: var(--muted); font: 600 11px/1 "IBM Plex Mono", monospace; }
+select { min-width: 142px; padding-right: 30px; }
+
+.chart-panel {
+  margin-top: 28px;
+  background: var(--panel);
+  border: 1px solid #d5dad6;
+  border-top: 4px solid var(--teal);
+  box-shadow: 0 16px 38px rgba(29, 43, 37, 0.08);
+}
+
+.chart-meta {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  align-items: center;
+  gap: 22px;
+  min-height: 54px;
+  padding: 0 22px;
+  border-bottom: 1px solid #e2e6e3;
+  color: var(--muted);
+  font: 500 12px/1 "IBM Plex Mono", monospace;
+}
+
+.chart-meta span { display: inline-flex; align-items: center; gap: 7px; }
+.chart-meta .unit { margin-left: auto; }
+.line-key { width: 22px; height: 3px; background: var(--teal); }
+.range-key { width: 22px; height: 0; border-top: 2px solid color-mix(in srgb, var(--teal) 60%, transparent); }
+.grid-boundary-key { width: 0; height: 14px; border-left: 2px dashed #5b666f; }
+.grid-label { font-family: Georgia, serif; font-size: 12px; }
+
+.chart-wrap {
+  position: relative;
+  height: min(64vh, 620px);
+  min-height: 420px;
+  padding: 20px 24px 16px;
+  overflow-x: auto;
+}
+
+.chart-stage { position: relative; width: 100%; min-width: 1050px; height: 100%; }
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 2px 0;
+  color: var(--muted);
+  font: 500 11px/1.4 "IBM Plex Mono", monospace;
+}
+
+@media (max-width: 640px) {
+  main { width: min(100% - 24px, 1180px); padding-top: 28px; }
+  header { align-items: flex-start; flex-direction: column; }
+  h1 { font-size: 36px; }
+  .actions { width: 100%; flex-wrap: wrap; }
+  .actions label { flex: 1 1 130px; }
+  select { width: 100%; }
+  .chart-wrap { height: 520px; padding: 12px 8px 10px; }
+  .chart-meta { padding: 0 12px; gap: 12px; }
+  .chart-meta .unit { display: none; }
+}

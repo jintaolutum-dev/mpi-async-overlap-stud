@@ -38,11 +38,8 @@ GHOST="{{ grid.ghost | default('8_8_8') }}"
 VARS={{ grid.vars | default(3) }}
 COMM_CUTOFF={{ grid.cutoff | default(250) }}
 
-{% if compute_mode.get('midcomm_flag') %}
-COMPUTE_ARGS="{{ compute_mode.midcomm_flag }}"
-{% else %}
-COMPUTE_ARGS=""
-{% endif %}
+COMPUTE_ARGS="-compute_target_us {{ mpi.compute_target_us.get(topology.name, {}).get(grid.name, topology.compute_target_us.get(grid.name, grid.compute_target_us)) if compute_mode.name == 'midcomm' else 0 }}"
+CYCLE_ARGS="{{ '-cycles ' ~ grid.cycles if grid.cycles is defined else '' }}"
 
 CPU_TOPOLOGY_MAP="$(lscpu -p=CPU,SOCKET,NODE 2>/dev/null | grep -v '^#' || true)"
 export CPU_TOPOLOGY_MAP
@@ -251,6 +248,14 @@ run_case() {
     "$@" 2>&1 | tee -a "${label}.log"
     local rc=${PIPESTATUS[0]}
     echo "===== ${label} exit code: ${rc} =====" | tee -a "${label}.log"
+    if [[ "${I_MPI_DEBUG:-0}" != "0" ]] && ! grep -q '^>>> intel_mpi_runtime_transport' "${JOB_METADATA_FILE}"; then
+        {
+            echo ">>> intel_mpi_runtime_transport (${label})"
+            grep -Ei 'MPI startup\(\):.*(fabric|provider|network|ofi|shm)' "${label}.log" || \
+                echo "No Intel MPI runtime transport lines matched; inspect ${label}.log."
+            echo
+        } >> "${JOB_METADATA_FILE}"
+    fi
     return ${rc}
 }
 
@@ -262,14 +267,16 @@ _comb_args() {
 -ghost ${GHOST} \
 -vars ${VARS} \
 -comm cutoff ${COMM_CUTOFF} \
--comm enable mpi \
-{{ '-comm enable mock \\' if compute_mode.get('enable_mock', True) else '' }}
+-comm disable all \
+{{ '-comm enable mpi \\' if compute_mode.backend_mode in ['both', 'mpi_only'] else '' }}
+{{ '-comm enable mock \\' if compute_mode.backend_mode in ['both', 'mock_only'] else '' }}
 -comm post_recv {{ comm.post_recv | default('wait_all') }} \
 -comm post_send {{ comm.post_send | default('wait_all') }} \
 -comm wait_recv ${wait_mode} \
 -comm wait_send ${wait_mode} \
 -exec enable omp \
 ${COMPUTE_ARGS} \
+${CYCLE_ARGS} \
 -print_message_sizes \
 -print_packing_sizes"
 }

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MPI Communication Overlap</title>
+  <link rel="stylesheet" href="styles.css?v=20260910-retests">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <p class="eyebrow" id="configuration">2N2R · SEQ/SEQ-SEQ · WAIT_ALL</p>
+        <h1><span id="mpi-title">Open MPI</span> · <span id="case-title">Case 01</span></h1>
+        <p class="subtitle">Communication overlap across message sizes · <a href="compute-time.html">插入计算时间对比（0.5T / Tcomm / 2T）</a> · <a href="#polling-comparison">Polling 对比</a></p>
+      </div>
+      <div class="actions">
+        <label><span>Dataset</span><select id="dataset-select">
+          <option value="inter">cm4_inter / 2n2r</option>
+          <option value="2n2r_c24">cm4_std / 2n2r</option>
+          <option value="4n4r_c24">cm4_std / 4n4r</option>
+        </select></label>
+        <label><span>MPI implementation</span><select id="mpi-select">
+          <option value="openmpi">Open MPI</option>
+          <option value="intelmpi">Intel MPI verbs</option>
+          <option value="intelmpi_tcp">Intel MPI TCP</option>
+          <option value="mpich">MPICH TCP</option>
+        </select></label>
+        <label><span>Case</span><select id="case-select">
+          <option value="01" selected>Case 01</option>
+          <option value="06">Case 06</option>
+          <option value="01-06">Case 01 vs 06</option>
+          <option value="06-09">Case 06 vs 09</option>
+          <option value="03-06">Case 03 vs 06</option>
+          <option value="03-09">Case 03 vs 09</option>
+          <option value="01-03">Case 01 vs 03</option>
+          <option value="resources">Case 04 vs 05 vs 06</option>
+        </select></label>
+        <label id="resource-metric-control" hidden><span>Metric</span><select id="resource-metric">
+          <option value="bench_mid">Midcomm runtime (s)</option>
+          <option value="overlap">Normalized wait reduction (%)</option>
+          <option value="wait_mid_us">Midcomm wait-recv (us)</option>
+          <option value="wait_no_us">No-midcomm wait-recv (us)</option>
+          <option value="pre_us">Midcomm pre-comm (us)</option>
+          <option value="post_us">Midcomm post-comm (us)</option>
+          <option value="compute_us">Measured compute (us)</option>
+        </select></label>
+        <button id="download" type="button" title="Export PNG" aria-label="Export PNG"><i data-lucide="download"></i></button>
+      </div>
+    </header>
+
+    <section class="chart-panel" aria-label="MPI communication overlap line chart">
+      <div class="chart-meta">
+        <span><i class="line-key"></i><span id="primary-key">Mean</span></span>
+        <span id="range-key"><i class="range-key"></i>Min–max range</span>
+        <span id="comparison-key" hidden><i class="second-key"></i><span id="secondary-key">09 · test_all</span></span>
+        <span><i class="grid-boundary-key"></i><span class="grid-label">8<sup>3</sup> grid</span> | <span class="grid-label">32<sup>3</sup> grid</span></span>
+        <span class="unit">Unit: %</span>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-stage"><canvas id="overlap-chart"></canvas></div>
+      </div>
+    </section>
+
+    <p class="source" id="data-status"></p>
+    <p class="source">Retest denominator: fixed old communication baseline. Original denominator: measured mid-comm time.</p>
+
+    <section id="comparison-section" aria-label="Run selection and overlap data">
+      <h2 id="difference-title">Case 09 − Case 06</h2>
+      <div class="table-wrap"><table>
+        <thead id="data-head"></thead>
+        <tbody id="comparison-body"></tbody>
+      </table></div>
+      <p class="source"><a href="compute-time.html">插入计算时间对比（0.5T / Tcomm / 2T）</a> · <a href="../实验记录/消息大小影响.md">Experiment record</a> · <a id="comparison-csv" href="overlap-current.csv" download>CSV</a> · <a id="runs-csv" href="overlap-runs-current.csv" download>Per-run timings</a></p>
+    </section>
+
+    <section id="polling-comparison" aria-label="Polling comparison">
+      <h2>Polling 对比</h2>
+      <label><span>MPI</span><select id="polling-mpi"><option value="openmpi" selected>OpenMPI</option><option value="intelmpi">Intel MPI verbs</option></select></label>
+      <p class="source">cm4_inter / 2n2r_c24 · seq/seq/seq · 同消息大小下，无 polling 与 compute_poll_count=2 对比。此区独立于上方筛选器。</p>
+      <div class="actions">
+        <label><span>Case</span><select id="polling-case"><option value="01" selected>01 · wait_all · 24 · off</option><option value="02">02 · test_all · 24 · off</option><option value="03">03 · wait_all · 23 · on</option><option value="04">04 · test_all · 23 · on</option></select></label>
+        <label><span>指标</span><select id="polling-metric">
+          <option value="overlap">Overlap (%)</option>
+          <option value="wait_no_us">No-midcomm wait-recv (μs)</option>
+          <option value="wait_mid_us">Midcomm wait-recv (μs)</option>
+          <option value="compute_us">Measured mid-comm (μs)</option>
+          <option value="cycle_mid_ms">Midcomm time per cycle (ms)</option>
+        </select></label>
+        <button id="polling-download" type="button">下载 PNG</button>
+      </div>
+      <p class="source">Overlap = (no_midcomm wait-recv − midcomm wait-recv) / 实测 mid-comm × 100%。两组均从原始计时重新计算；柱高为均值，误差线为 overlap 的 min–max。缺失数据留空。</p>
+      <div class="chart-panel"><div class="chart-wrap"><div class="chart-stage"><canvas id="polling-chart" aria-label="无 polling 与有 polling 分组柱状图"></canvas></div></div></div>
+      <p class="source" id="polling-status"></p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Peer payload</th><th>无 polling min / mean / max (%)</th><th>有 polling min / mean / max (%)</th><th>均值差 (pp)</th><th>无 polling runs</th><th>有 polling runs</th><th>目标计算 μs（无 / 有）</th><th>cycles（无 / 有）</th></tr></thead>
+        <tbody id="polling-body"></tbody>
+      </table></div>
+      <details><summary>缺失或排除的 run / case 结果</summary><ul id="polling-missing"></ul></details>
+      <p class="source">两组为独立批次，均值差不是逐 run 配对差。计算目标或 cycles 不同的点，不能将全部差异归因于 polling。</p>
+      <p class="source"><a href="polling-runs.csv?v=per-cycle-20260915" download>Polling per-run CSV</a></p>
+    </section>
+
+    <footer>
+      <span>Peer payload (equally spaced categories)</span>
+      <span>19 message sizes</span>
+    </footer>
+  </main>
+
+  <script src="vendor/chart.umd.min.js"></script>
+  <script src="vendor/lucide.min.js"></script>
+  <script src="data.js?v=72086e06ebb7"></script>
+  <script src="resources-data.js?v=20260911-openmpi452-r19"></script>
+  <script src="std-data.js?v=20260911-std"></script>
+  <script src="std-comparisons-data.js?v=bc0ebddd573e"></script>
+  <script src="resources.js?v=20260911-std-all"></script>
+  <script src="polling-data.js?v=per-cycle-20260915"></script>
+  <script src="polling.js?v=openmpi-four-cases-20260915"></script>
+  <script src="app.js?v=a0b10b204988"></script>
+</body>
+</html>

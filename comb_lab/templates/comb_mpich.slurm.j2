@@ -32,12 +32,10 @@ DIVIDE="{{ topology.divide | default('2_2_1') }}"
 PERIODIC="{{ grid.periodic | default('1_1_1') }}"
 GHOST="{{ grid.ghost | default('8_8_8') }}"
 VARS={{ grid.vars | default(3) }}
+COMM_CUTOFF={{ grid.cutoff | default(250) }}
 
-{% if compute_mode.get('midcomm_flag') %}
-COMPUTE_ARGS="{{ compute_mode.midcomm_flag }}"
-{% else %}
-COMPUTE_ARGS=""
-{% endif %}
+COMPUTE_ARGS="-compute_target_us {{ mpi.compute_target_us.get(topology.name, {}).get(grid.name, topology.compute_target_us.get(grid.name, grid.compute_target_us)) if compute_mode.name == 'midcomm' else 0 }}"
+CYCLE_ARGS="{{ '-cycles ' ~ grid.cycles if grid.cycles is defined else '' }}"
 
 CPU_TOPOLOGY_MAP="$(lscpu -p=CPU,SOCKET,NODE 2>/dev/null | grep -v '^#' || true)"
 export CPU_TOPOLOGY_MAP
@@ -259,11 +257,15 @@ _comb_args() {
     echo "${GRID_SIZE} \
 -divide ${DIVIDE} -periodic ${PERIODIC} -ghost ${GHOST} \
 -vars ${VARS} \
--comm enable mpi \
+-comm cutoff ${COMM_CUTOFF} \
+-comm disable all \
+{{ '-comm enable mpi \\' if compute_mode.backend_mode in ['both', 'mpi_only'] else '' }}
+{{ '-comm enable mock \\' if compute_mode.backend_mode in ['both', 'mock_only'] else '' }}
 -comm post_recv {{ comm.post_recv | default('wait_all') }} \
 -comm post_send {{ comm.post_send | default('wait_all') }} \
 -comm wait_recv ${wait_mode} -comm wait_send ${wait_mode} \
 -exec enable omp ${COMPUTE_ARGS} \
+${CYCLE_ARGS} \
 -print_message_sizes -print_packing_sizes"
 }
 
@@ -302,11 +304,31 @@ run_regular_case() {
 
 run_async_case() {
     local label="$1" cpus_per_task="$2" wait_mode="$3" async_threads="$4"
+    local backend_async_threads={{ mpi.async_threads | default(1) }}
 
-    if (( async_threads < 1 )); then
-        echo "run_async_case requires at least 1 reserved async CPU per rank" >&2
+    if (( async_threads != backend_async_threads )); then
+        echo "configured MPICH async backend provides ${backend_async_threads} progress thread(s) per rank, but case requests ${async_threads}" >&2
         return 1
     fi
+
+    local affinity_records first_node progress_affinity="" record node_id local_id cpu_id
+    mapfile -t affinity_records < <(
+        srun -n ${NTASKS} --ntasks-per-node=${NTASKS_PER_NODE} \
+             -c "${cpus_per_task}" --cpu-bind=cores \
+             bash -c 'allowed=$(awk '\''/Cpus_allowed_list/ {print $2}'\'' /proc/self/status); echo "$SLURM_NODEID $SLURM_LOCALID ${allowed##*[,-]}"' \
+        | sort -n -k1,1 -k2,2
+    )
+    if (( {% raw %}${#affinity_records[@]}{% endraw %} == 0 )); then
+        echo "failed to discover MPICH progress-thread CPUs" >&2
+        return 1
+    fi
+    first_node="${affinity_records[0]%% *}"
+    for record in "${affinity_records[@]}"; do
+        read -r node_id local_id cpu_id <<< "${record}"
+        [[ "${node_id}" == "${first_node}" ]] || continue
+        progress_affinity+="${progress_affinity:+,}${cpu_id}"
+    done
+    export MPIR_CVAR_PROGRESS_THREAD_AFFINITY="${progress_affinity}"
 
     set_case_metadata "${cpus_per_task}" cores "${wait_mode}" "omp places + reserved async CPUs"
 
@@ -386,6 +408,7 @@ run_async_case \
     {{ case.async_threads | default(1) }}
 {% else %}
 export {{ mpi.async_env | default('MPIR_CVAR_ASYNC_PROGRESS') }}=0
+unset MPIR_CVAR_PROGRESS_THREAD_AFFINITY
 run_regular_case \
     "{{ '%02d' % loop.index0 }}_async{{ case.async }}_c{{ case.omp_threads }}_{{ case.wait_mode }}" \
     {{ slurm.runtime_cpus_per_rank | default(24) }} \

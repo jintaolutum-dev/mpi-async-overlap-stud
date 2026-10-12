@@ -22,6 +22,9 @@ module load {{ mod }}
 {% for k, v in (mpi.protocol_env | default({})).items() %}
 export {{ k }}="{{ v }}"
 {% endfor %}
+{% for k, v in (mpi.diagnostics.mca_env | default({})).items() %}
+export {{ k }}="{{ v }}"
+{% endfor %}
 
 ln -sf {{ mpi.binary }} ./comb
 
@@ -32,12 +35,10 @@ DIVIDE="{{ topology.divide | default('2_2_1') }}"
 PERIODIC="{{ grid.periodic | default('1_1_1') }}"
 GHOST="{{ grid.ghost | default('8_8_8') }}"
 VARS={{ grid.vars | default(3) }}
+COMM_CUTOFF={{ grid.cutoff | default(250) }}
 
-{% if compute_mode.get('midcomm_flag') %}
-COMPUTE_ARGS="{{ compute_mode.midcomm_flag }}"
-{% else %}
-COMPUTE_ARGS=""
-{% endif %}
+COMPUTE_ARGS="{{ '-compute_target_us ' ~ mpi.compute_target_us.get(topology.name, {}).get(grid.name, topology.compute_target_us.get(grid.name, grid.compute_target_us)) if compute_mode.name == 'midcomm' else '-compute_target_us 0' }}"
+CYCLE_ARGS="{{ '-cycles ' ~ grid.cycles if grid.cycles is defined else '' }}"
 
 CPU_TOPOLOGY_MAP="$(lscpu -p=CPU,SOCKET,NODE 2>/dev/null | grep -v '^#' || true)"
 export CPU_TOPOLOGY_MAP
@@ -187,7 +188,7 @@ write_job_metadata() {
         echo "ntasks=${NTASKS}"
         echo "ntasks_per_node=${NTASKS_PER_NODE}"
         echo "cpus_per_task_request={{ slurm.cpus_per_task | default(topology.cpus_per_task) }}"
-        echo "runtime_cpus_per_rank={{ slurm.runtime_cpus_per_rank | default(topology.cpus_per_task) }}"
+        echo "runtime_cpus_per_rank={{ mpi.runtime_cpus_per_rank | default(slurm.runtime_cpus_per_rank | default(topology.cpus_per_task)) }}"
         echo "grid_size=${GRID_SIZE}"
         echo "divide=${DIVIDE}"
         echo "periodic=${PERIODIC}"
@@ -266,16 +267,33 @@ run_case() {
     return ${rc}
 }
 
+dump_rank_runtime_state() {
+    local rank_id="${OMPI_COMM_WORLD_RANK:-unknown}"
+    local process_status
+    local affinity
+    local thread_count
+
+    process_status="$(grep -E '^(Cpus_allowed_list|Mems_allowed_list):' /proc/self/status | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+    affinity="$(taskset -pc $$ 2>&1 | tr '\n' ' ')"
+    thread_count="$(ps -o nlwp= -p $$ 2>/dev/null | tr -d '[:space:]')"
+    echo "runtime_state rank=${rank_id} host=$(hostname) pid=$$ threads=${thread_count:-unknown} ${process_status} taskset=${affinity}"
+}
+
+export -f dump_rank_runtime_state
+
 _comb_args() {
     local wait_mode="$1"
     echo "${GRID_SIZE} \
 -divide ${DIVIDE} -periodic ${PERIODIC} -ghost ${GHOST} \
 -vars ${VARS} \
--comm enable mpi \
+-comm cutoff ${COMM_CUTOFF} \
+-comm disable all \
+{{ '-comm enable mpi \\' if compute_mode.backend_mode in ['both', 'mpi_only'] else '' }}
+{{ '-comm enable mock \\' if compute_mode.backend_mode in ['both', 'mock_only'] else '' }}
 -comm post_recv {{ comm.post_recv | default('wait_all') }} \
 -comm post_send {{ comm.post_send | default('wait_all') }} \
 -comm wait_recv ${wait_mode} -comm wait_send ${wait_mode} \
--exec enable omp ${COMPUTE_ARGS} \
+-exec enable omp ${COMPUTE_ARGS} ${CYCLE_ARGS} \
 -print_message_sizes -print_packing_sizes"
 }
 
@@ -290,7 +308,7 @@ set_case_metadata() {
     local wait_mode="$3"
     local binding_mode="$4"
 
-    CASE_LAUNCHER="mpirun --mca plm slurm --hostfile ${OPENMPI_HOSTFILE} -np ${NTASKS} --map-by ppr:${NTASKS_PER_NODE}:node:PE=${cpus_per_task} --bind-to core"
+    CASE_LAUNCHER="mpirun --mca plm slurm --hostfile ${OPENMPI_HOSTFILE} -np ${NTASKS} --map-by ppr:${NTASKS_PER_NODE}:node:PE=${cpus_per_task} --bind-to core{% if mpi.diagnostics.report_bindings | default(false) %} --report-bindings{% endif %}"
     CASE_COMB_CMD="./comb $(_comb_args_flat ${wait_mode})"
     CASE_BINDING_MODE="${binding_mode}"
 }
@@ -301,13 +319,16 @@ run_regular_case() {
     set_case_metadata "${cpus_per_task}" cores "${wait_mode}" "mpirun --bind-to core"
 
     run_case "${label}" \
-        mpirun --mca plm slurm --hostfile "${OPENMPI_HOSTFILE}" -np ${NTASKS} --map-by ppr:${NTASKS_PER_NODE}:node:PE=${cpus_per_task} --bind-to core \
+        mpirun --mca plm slurm --hostfile "${OPENMPI_HOSTFILE}" -np ${NTASKS} --map-by ppr:${NTASKS_PER_NODE}:node:PE=${cpus_per_task} --bind-to core{% if mpi.diagnostics.report_bindings | default(false) %} --report-bindings{% endif %} \
         bash -lc "
             rank_id=\${OMPI_COMM_WORLD_RANK:-unknown}
+            export OMP_PROC_BIND=close
+            export OMP_PLACES=cores
             allowed=\$(awk '/Cpus_allowed_list/ {print \$2}' /proc/self/status)
             main_topology=\$(cpu_list_topology_sets "\${allowed}")
             IFS='|' read -r main_socket_set main_numa_set <<< "\${main_topology}"
             echo \"rank=\${rank_id} host=\$(hostname) bind_mode=mpirun allowed=\${allowed} main_cpu_list=\${allowed} progress_cpu_list= main_socket_set=\${main_socket_set} progress_socket_set=none main_numa_set=\${main_numa_set} progress_numa_set=none binding_relation=no_progress_threads\"
+            dump_rank_runtime_state
             exec ./comb $(_comb_args_flat ${wait_mode})
         "
 }
@@ -324,7 +345,7 @@ run_async_case() {
     set_case_metadata "${cpus_per_task}" cores "${wait_mode}" "omp places + reserved async CPUs"
 
     run_case "${label}" \
-        mpirun --mca plm slurm --hostfile "${OPENMPI_HOSTFILE}" -np ${NTASKS} --map-by ppr:${NTASKS_PER_NODE}:node:PE=${cpus_per_task} --bind-to core \
+        mpirun --mca plm slurm --hostfile "${OPENMPI_HOSTFILE}" -np ${NTASKS} --map-by ppr:${NTASKS_PER_NODE}:node:PE=${cpus_per_task} --bind-to core{% if mpi.diagnostics.report_bindings | default(false) %} --report-bindings{% endif %} \
         bash -lc "
             rank_id=\${OMPI_COMM_WORLD_RANK:-unknown}
             allowed=\$(awk '/Cpus_allowed_list/ {print \$2}' /proc/self/status)
@@ -374,7 +395,7 @@ run_async_case() {
 
             export OMP_PROC_BIND=close
             export OMP_PLACES=\"\${omp_places}\"
-            export GOMP_CPU_AFFINITY=\"\${cpu_list}\"
+            unset GOMP_CPU_AFFINITY
 
             main_topology=\$(cpu_list_topology_sets "\${cpu_list}")
             IFS='|' read -r main_socket_set main_numa_set <<< "\${main_topology}"
@@ -384,6 +405,7 @@ run_async_case() {
 
             echo \"rank=\${rank_id} host=\$(hostname) bind_mode=omp_places allowed=\${allowed} total_cpus_per_rank=\${total_cpus_per_task} omp_threads=\${omp_threads} async_threads=\${async_threads} main_cpus_per_rank=\${main_cpus_per_task} main_cpu_list=\${cpu_list} progress_cpu_list=\${reserved_async_cpu_list} reserved_async_cpu_list=\${reserved_async_cpu_list} main_socket_set=\${main_socket_set} progress_socket_set=\${progress_socket_set} main_numa_set=\${main_numa_set} progress_numa_set=\${progress_numa_set} binding_relation=\${binding_relation}\"
             echo \"rank=\${rank_id} host=\$(hostname)\"
+            dump_rank_runtime_state
             exec ./comb $(_comb_args_flat ${wait_mode})
         "
 }
@@ -393,18 +415,20 @@ run_async_case() {
 export OMP_NUM_THREADS={{ case.omp_threads | default(1) }}
 {% if case.async == 1 %}
 export {{ mpi.async_env | default('OMPI_MCA_mpi_yield_when_idle') }}={{ mpi.async_env_on | default('0') }}
+export OMPI_MCA_btl_tcp_progress_thread=1
 export OMPI_MCA_opal_progress_sched_yield=0
 export OMPI_MCA_mpi_add_procs_cutoff=0
 run_async_case \
     "{{ '%02d' % loop.index0 }}_async{{ case.async }}_at{{ case.async_threads | default(1) }}_c{{ case.omp_threads }}_{{ case.wait_mode }}" \
-    {{ slurm.runtime_cpus_per_rank | default(24) }} \
+    {{ mpi.runtime_cpus_per_rank | default(slurm.runtime_cpus_per_rank | default(24)) }} \
     {{ case.wait_mode }} \
     {{ case.async_threads | default(1) }}
 {% else %}
 unset {{ mpi.async_env | default('OMPI_MCA_mpi_yield_when_idle') }}
+unset OMPI_MCA_btl_tcp_progress_thread
 run_regular_case \
     "{{ '%02d' % loop.index0 }}_async{{ case.async }}_c{{ case.omp_threads }}_{{ case.wait_mode }}" \
-    {{ slurm.runtime_cpus_per_rank | default(24) }} \
+    {{ mpi.runtime_cpus_per_rank | default(slurm.runtime_cpus_per_rank | default(24)) }} \
     {{ case.wait_mode }}
 {% endif %}
 {% endfor %}
