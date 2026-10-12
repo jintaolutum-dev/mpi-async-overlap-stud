@@ -1,0 +1,44 @@
+===== 03_async0_c24_test_all =====
+launcher=srun -n 4 --ntasks-per-node=1 -c 24 --cpu-bind=cores
+comb_cmd=./comb 8_8_8 -divide 2_2_1 -periodic 1_1_1 -ghost 1_1_1 -vars 17 -comm cutoff 250 -comm enable mpi -comm enable mock -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -compute_target_us 50 -cycles 100 -print_message_sizes -print_packing_sizes 
+binding_mode=slurm --cpu-bind=cores
+job_metadata_file=job_metadata.log
+rank=2 host=cm4r15c02s04 bind_mode=slurm allowed=0-11,112-123 main_cpu_list=0-11,112-123 progress_cpu_list= main_socket_set=unknown progress_socket_set=none main_numa_set=unknown progress_numa_set=none binding_relation=no_progress_threads
+rank=3 host=cm4r15c04s04 bind_mode=slurm allowed=0-11,112-123 main_cpu_list=0-11,112-123 progress_cpu_list= main_socket_set=unknown progress_socket_set=none main_numa_set=unknown progress_numa_set=none binding_relation=no_progress_threads
+rank=1 host=cm4r15c02s03 bind_mode=slurm allowed=0-11,112-123 main_cpu_list=0-11,112-123 progress_cpu_list= main_socket_set=unknown progress_socket_set=none main_numa_set=unknown progress_numa_set=none binding_relation=no_progress_threads
+rank=0 host=cm4r13c06s07 bind_mode=slurm allowed=0-11,112-123 main_cpu_list=0-11,112-123 progress_cpu_list= main_socket_set=unknown progress_socket_set=none main_numa_set=unknown progress_numa_set=none binding_relation=no_progress_threads
+Comb version 0.3.1
+Args  ./comb;8_8_8;-divide;2_2_1;-periodic;1_1_1;-ghost;1_1_1;-vars;17;-comm;cutoff;250;-comm;enable;mpi;-comm;enable;mock;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-compute_target_us;50;-cycles;100;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 4
+Node cm4r13c06s07
+Compiler "/usr/bin/c++"
+OMP num threads    24
+OMP thread map    121;122;123;113;115;116;117;6;119;114;112;8;9;10;11;1;3;4;5;118;7;2;0;120
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles        100
+Num vars           17
+ghost_widths        1        1        1
+sizes               8        8        8
+divisions           2        2        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map                 4        4        8
+map                 8        8         
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 03_async0_c24_test_all exit code: 0 =====

@@ -1,0 +1,7 @@
+
+===== 05_async1_at12_c12_wait_all =====
+launcher=srun -n 2 --ntasks-per-node=1 -c 24 --cpu-bind=none
+comb_cmd=./comb 32_32_32 -divide 2_1_1 -periodic 1_1_1 -ghost 1_1_1 -vars 1 -comm cutoff 250 -comm disable all -comm enable mpi -comm enable mock -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -compute_target_us 0 -cycles 100 -print_message_sizes -print_packing_sizes 
+binding_mode=manual taskset + split main/async CPUs
+job_metadata_file=job_metadata.log
+===== 05_async1_at12_c12_wait_all exit code: 130 =====

@@ -1,0 +1,7 @@
+# Experiment notes: run_001
+cycles=100
+
+# actual-mpi-send-payloads: begin
+Actual MPI_Isend payloads, rank 0: partner 0: 1081344 B (1056.00 KiB); partner 1: 1183744 B (1156.00 KiB)
+Actual MPI_Isend payloads, rank 1: partner 1: 1081344 B (1056.00 KiB); partner 0: 1183744 B (1156.00 KiB)
+# actual-mpi-send-payloads: end

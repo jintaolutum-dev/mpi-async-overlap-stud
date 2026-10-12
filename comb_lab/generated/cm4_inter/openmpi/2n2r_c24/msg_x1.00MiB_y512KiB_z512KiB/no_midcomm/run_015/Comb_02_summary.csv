@@ -1,0 +1,134 @@
+Comb version 0.3.1
+Args  ./comb;32_32_32;-divide;2_1_1;-periodic;1_1_1;-ghost;1_1_1;-vars;128;-comm;cutoff;250;-comm;disable;all;-comm;enable;mpi;-comm;enable;mock;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;wait_all;-comm;wait_send;wait_all;-exec;enable;omp;-compute_target_us;0;-compute_poll_count;2;-cycles;100;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 2
+Node cm4r15c06s04
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads    23
+OMP thread map      0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16;17;18;19;20;21;22
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using wait_all method
+Wait Send using wait_all method
+Num cycles        100
+Num vars          128
+ghost_widths        1        1        1
+sizes              32       32       32
+divisions           2        1        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map                16       32       32
+map                32                  
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+                     ,    number,  average(s),      min(s),      max(s)
+copy_sync-128-20808-8,       200, 0.002044206, 0.001554896, 0.005122927
+Starting test memcpy omp dst Host src Host
+                     ,    number,  average(s),      min(s),      max(s)
+copy_sync-128-20808-8,       200, 0.001043554, 0.000291826, 0.033495109
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Compute polling: requested_count=2 active=0 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.001855721, 0.000965311, 0.007246101
+post-recv ,       200, 0.000014752, 0.000007192, 0.000046241
+post-send ,       200, 0.003459305, 0.001842330, 0.011412958
+mid-comm  ,       200, 0.000000195, 0.000000102, 0.000000503
+wait-recv ,       200, 0.003158536, 0.001879869, 0.008460602
+wait-send ,       200, 0.000351601, 0.000141222, 0.000949787
+post-comm ,       200, 0.001798786, 0.000857624, 0.008468329
+start-up  ,         2, 0.008133565, 0.006669085, 0.009598044
+test-comm ,         2, 0.758349343, 0.758348409, 0.758350277
+bench-comm,         2, 1.554044826, 1.554044541, 1.554045111
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Compute polling: requested_count=2 active=0 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.000504292, 0.000319408, 0.019861334
+post-recv ,       200, 0.000012530, 0.000005732, 0.000043285
+post-send ,       200, 0.003480865, 0.002235368, 0.010888150
+mid-comm  ,       200, 0.000000237, 0.000000072, 0.000010988
+wait-recv ,       200, 0.002946531, 0.001935425, 0.009048210
+wait-send ,       200, 0.000308733, 0.000146016, 0.000912232
+post-comm ,       200, 0.007150156, 0.000336345, 0.098273515
+start-up  ,         2, 0.000748738, 0.000676925, 0.000820550
+test-comm ,         2, 0.228712323, 0.228710101, 0.228714544
+bench-comm,         2, 2.378838863, 2.378834952, 2.378842773
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Compute polling: requested_count=2 active=0 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.000592580, 0.000314184, 0.022977815
+post-recv ,       200, 0.000011980, 0.000005784, 0.000038261
+post-send ,       200, 0.002710558, 0.001474091, 0.018567763
+mid-comm  ,       200, 0.000000169, 0.000000071, 0.000000540
+wait-recv ,       200, 0.004637627, 0.001654643, 0.017985823
+wait-send ,       200, 0.000304460, 0.000142764, 0.000888123
+post-comm ,       200, 0.006379298, 0.000353507, 0.140060187
+start-up  ,         2, 0.009887335, 0.000953781, 0.018820888
+test-comm ,         2, 0.253994333, 0.253987777, 0.254000889
+bench-comm,         2, 2.527004154, 2.526985283, 2.527023025
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Compute polling: requested_count=2 active=0 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.000403198, 0.000319055, 0.001167772
+post-recv ,       200, 0.000012812, 0.000005602, 0.000041609
+post-send ,       200, 0.002700898, 0.001475314, 0.018568101
+mid-comm  ,       200, 0.000000172, 0.000000076, 0.000000684
+wait-recv ,       200, 0.005134608, 0.001654726, 0.021535291
+wait-send ,       200, 0.000315755, 0.000143352, 0.000906944
+post-comm ,       200, 0.008746958, 0.000355120, 0.167963284
+start-up  ,         2, 0.005337141, 0.001176641, 0.009497641
+test-comm ,         2, 0.269643498, 0.269638697, 0.269648299
+bench-comm,         2, 3.062227602, 3.062218559, 3.062236644
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Compute polling: requested_count=2 active=1 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.001576887, 0.000875923, 0.007628368
+post-recv ,       200, 0.000022707, 0.000007646, 0.000088726
+post-send ,       200, 0.004215146, 0.002529937, 0.014740332
+mid-comm  ,       200, 0.000000200, 0.000000067, 0.000000681
+wait-recv ,       200, 0.006244520, 0.001330993, 0.031900302
+wait-send ,       200, 0.000568246, 0.000250168, 0.001861985
+post-comm ,       200, 0.001527650, 0.000854976, 0.009125195
+start-up  ,         2, 0.002288321, 0.002148043, 0.002428598
+test-comm ,         2, 1.053196183, 1.053148617, 1.053243749
+bench-comm,         2, 1.416871894, 1.416871583, 1.416872204
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Compute polling: requested_count=2 active=1 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.000473186, 0.000312123, 0.015243839
+post-recv ,       200, 0.000026505, 0.000006520, 0.000084558
+post-send ,       200, 0.004574247, 0.002920580, 0.014135774
+mid-comm  ,       200, 0.000000170, 0.000000069, 0.000000653
+wait-recv ,       200, 0.014603328, 0.001571644, 0.269473488
+wait-send ,       200, 0.000558979, 0.000251101, 0.001830750
+post-comm ,       200, 0.009689913, 0.000332211, 0.264783124
+start-up  ,         2, 0.000664901, 0.000600478, 0.000729323
+test-comm ,         2, 0.382224098, 0.382220120, 0.382228077
+bench-comm,         2, 2.998472303, 2.998467705, 2.998476901
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Compute polling: requested_count=2 active=1 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.000395667, 0.000318695, 0.001130775
+post-recv ,       200, 0.000025468, 0.000006617, 0.000083597
+post-send ,       200, 0.004265409, 0.002162042, 0.025496553
+mid-comm  ,       200, 0.000000172, 0.000000073, 0.000000583
+wait-recv ,       200, 0.017332033, 0.001311220, 0.172213125
+wait-send ,       200, 0.000572927, 0.000250186, 0.001836371
+post-comm ,       200, 0.007409667, 0.000343944, 0.147736715
+start-up  ,         2, 0.000577491, 0.000538278, 0.000616704
+test-comm ,         2, 0.690020884, 0.690019623, 0.690022146
+bench-comm,         2, 3.008470369, 3.008462049, 3.008478689
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+Compute polling: requested_count=2 active=1 chunk_iterations=4096
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       200, 0.000390717, 0.000318741, 0.001135742
+post-recv ,       200, 0.000024710, 0.000006740, 0.000086946
+post-send ,       200, 0.004193182, 0.002162716, 0.023772589
+mid-comm  ,       200, 0.000000184, 0.000000065, 0.000000697
+wait-recv ,       200, 0.018919969, 0.001304090, 0.200198279
+wait-send ,       200, 0.000564169, 0.000249674, 0.001803224
+post-comm ,       200, 0.009577912, 0.000344059, 0.193383105
+start-up  ,         2, 0.000595241, 0.000536839, 0.000653643
+test-comm ,         2, 0.472126563, 0.472123575, 0.472129550
+bench-comm,         2, 3.370660476, 3.370658185, 3.370662767

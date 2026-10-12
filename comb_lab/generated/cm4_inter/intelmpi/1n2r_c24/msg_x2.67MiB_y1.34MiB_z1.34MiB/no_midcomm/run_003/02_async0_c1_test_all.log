@@ -1,0 +1,45 @@
+
+===== 02_async0_c1_test_all =====
+launcher=srun -n 2 --ntasks-per-node=2 -c 24 --cpu-bind=cores
+comb_cmd=./comb 148_148_148 -divide 2_1_1 -periodic 1_1_1 -ghost 4_4_4 -vars 4 -comm cutoff 250 -comm enable mpi -comm enable mock -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp  -compute_target_us 0 -cycles 100 -print_message_sizes -print_packing_sizes 
+binding_mode=slurm --cpu-bind=cores
+job_metadata_file=job_metadata.log
+rank=0 local_rank=0 host=cm4r15c06s03 bind_mode=slurm allowed=0-11,112-123 main_cpu_list=0,1,2,3,4,5,6,7,8,9,10,11,112,113,114,115,116,117,118,119,120,121,122,123 progress_cpu_list= main_socket_set=0 progress_socket_set=none main_numa_set=0 progress_numa_set=none binding_relation=no_progress_threads
+rank=1 local_rank=1 host=cm4r15c06s03 bind_mode=slurm allowed=12-23,124-135 main_cpu_list=12,13,14,15,16,17,18,19,20,21,22,23,124,125,126,127,128,129,130,131,132,133,134,135 progress_cpu_list= main_socket_set=0 progress_socket_set=none main_numa_set=0 progress_numa_set=none binding_relation=no_progress_threads
+MPI startup(): Error: Could not open /usr/lib64/libpmi2.so
+MPI startup(): Error: Could not open /usr/lib64/libpmi2.so
+Comb version 0.3.1
+Args  ./comb;148_148_148;-divide;2_1_1;-periodic;1_1_1;-ghost;4_4_4;-vars;4;-comm;cutoff;250;-comm;enable;mpi;-comm;enable;mock;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-compute_target_us;0;-cycles;100;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 2
+Node cm4r15c06s03
+Compiler "/dss/lrzsys/sys/spack/release/24.4.0/opt/x86_64/intel-oneapi-compilers/2024.1.0-gcc-ibqwgcs/compiler/2024.1/bin/icpx"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles        100
+Num vars            4
+ghost_widths        4        4        4
+sizes             148      148      148
+divisions           2        1        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map                74      148      148
+map               148                  
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 02_async0_c1_test_all exit code: 0 =====

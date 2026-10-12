@@ -1,0 +1,38 @@
+===== 07_async1_at1_c1_test_all =====
+launcher=srun -n 2 --ntasks-per-node=1 -c 24 --cpu-bind=cores
+comb_cmd=./comb 32_32_32 -divide 2_1_1 -periodic 1_1_1 -ghost 1_1_1 -vars 128 -comm cutoff 250 -comm disable all  -comm enable mock -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -compute_target_us 20.0 -cycles 80 -print_message_sizes -print_packing_sizes 
+binding_mode=omp places + reserved async CPUs
+job_metadata_file=job_metadata.log
+rank=1 host=cm4r15c06s07 bind_mode=omp_places allowed=0-11,112-123 total_cpus_per_rank=24 omp_threads=1 async_threads=1 main_cpus_per_rank=23 main_cpu_list=0,1,2,3,4,5,6,7,8,9,10,11,112,113,114,115,116,117,118,119,120,121,122 progress_cpu_list=123 reserved_async_cpu_list=123 main_socket_set=0 progress_socket_set=0 main_numa_set=0 progress_numa_set=0 binding_relation=same_numa
+rank=0 host=cm4r15c06s06 bind_mode=omp_places allowed=0-11,112-123 total_cpus_per_rank=24 omp_threads=1 async_threads=1 main_cpus_per_rank=23 main_cpu_list=0,1,2,3,4,5,6,7,8,9,10,11,112,113,114,115,116,117,118,119,120,121,122 progress_cpu_list=123 reserved_async_cpu_list=123 main_socket_set=0 progress_socket_set=0 main_numa_set=0 progress_numa_set=0 binding_relation=same_numa
+Comb version 0.3.1
+Args  ./comb;32_32_32;-divide;2_1_1;-periodic;1_1_1;-ghost;1_1_1;-vars;128;-comm;cutoff;250;-comm;disable;all;-comm;enable;mock;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-compute_target_us;20.0;-cycles;80;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 2
+Node cm4r15c06s06
+Compiler "/usr/bin/c++"
+OMP num threads     1
+OMP thread map      0
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles         80
+Num vars          128
+ghost_widths        1        1        1
+sizes              32       32       32
+divisions           2        1        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map                16       32       32
+map                32                  
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+===== 07_async1_at1_c1_test_all exit code: 0 =====

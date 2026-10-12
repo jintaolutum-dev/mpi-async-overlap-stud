@@ -1,0 +1,126 @@
+Comb version 0.3.1
+Args  ./comb;32_32_32;-divide;2_1_1;-periodic;1_1_1;-ghost;1_1_1;-vars;128;-comm;cutoff;250;-comm;disable;all;-comm;enable;mpi;-comm;enable;mock;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-compute_target_us;0;-cycles;50;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 2
+Node cm4r15c06s06
+Compiler "/usr/bin/c++"
+OMP num threads    12
+OMP thread map      0;1;2;3;4;5;6;7;8;9;10;11
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles         50
+Num vars          128
+ghost_widths        1        1        1
+sizes              32       32       32
+divisions           2        1        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map                16       32       32
+map                32                  
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+                     ,    number,  average(s),      min(s),      max(s)
+copy_sync-128-20808-8,       100, 0.001657934, 0.001637405, 0.001762382
+Starting test memcpy omp dst Host src Host
+                     ,    number,  average(s),      min(s),      max(s)
+copy_sync-128-20808-8,       100, 0.000531345, 0.000518165, 0.000622630
+Starting test Comm mock Mesh seq Host Buffers seq Host seq Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000813082, 0.000804689, 0.000839654
+post-recv ,       100, 0.000007703, 0.000006006, 0.000008842
+post-send ,       100, 0.001877021, 0.001861893, 0.002155346
+mid-comm  ,       100, 0.000000095, 0.000000080, 0.000000110
+wait-recv ,       100, 0.001889738, 0.001869109, 0.002013038
+wait-send ,       100, 0.000152629, 0.000149310, 0.000163580
+post-comm ,       100, 0.000865983, 0.000861076, 0.000948450
+start-up  ,         2, 0.006440684, 0.006436522, 0.006444846
+test-comm ,         2, 0.107322780, 0.107310160, 0.107335400
+bench-comm,         2, 0.280897118, 0.280887282, 0.280906955
+Starting test Comm mock Mesh omp Host Buffers seq Host seq Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000486210, 0.000468275, 0.000508060
+post-recv ,       100, 0.000009497, 0.000005875, 0.000312471
+post-send ,       100, 0.002299999, 0.002216068, 0.005974510
+mid-comm  ,       100, 0.000000097, 0.000000080, 0.000000153
+wait-recv ,       100, 0.001930321, 0.001912512, 0.002211184
+wait-send ,       100, 0.000153263, 0.000149824, 0.000177798
+post-comm ,       100, 0.000503054, 0.000483730, 0.000535825
+start-up  ,         2, 0.000722646, 0.000712731, 0.000732560
+test-comm ,         2, 0.044558562, 0.044548354, 0.044568770
+bench-comm,         2, 0.269792614, 0.269782010, 0.269803217
+Starting test Comm mock Mesh omp Host Buffers omp Host seq Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000486047, 0.000467568, 0.000554377
+post-recv ,       100, 0.000006463, 0.000006004, 0.000006971
+post-send ,       100, 0.001490596, 0.001464816, 0.001519037
+mid-comm  ,       100, 0.000000094, 0.000000054, 0.000000113
+wait-recv ,       100, 0.001647135, 0.001629964, 0.001665879
+wait-send ,       100, 0.000150515, 0.000147798, 0.000160212
+post-comm ,       100, 0.000506365, 0.000489582, 0.000570576
+start-up  ,         2, 0.000774773, 0.000754781, 0.000794764
+test-comm ,         2, 0.035245533, 0.035244538, 0.035246528
+bench-comm,         2, 0.214834297, 0.214822981, 0.214845613
+Starting test Comm mock Mesh omp Host Buffers omp Host omp Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000476930, 0.000461020, 0.000494983
+post-recv ,       100, 0.000006387, 0.000005748, 0.000006853
+post-send ,       100, 0.001491348, 0.001462791, 0.001511768
+mid-comm  ,       100, 0.000000094, 0.000000078, 0.000000117
+wait-recv ,       100, 0.001648579, 0.001625221, 0.001739851
+wait-send ,       100, 0.000150597, 0.000147839, 0.000158480
+post-comm ,       100, 0.000498737, 0.000481819, 0.000648209
+start-up  ,         2, 0.000740264, 0.000736142, 0.000744387
+test-comm ,         2, 0.035236983, 0.035233516, 0.035240451
+bench-comm,         2, 0.214342488, 0.214336894, 0.214348082
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000899925, 0.000888872, 0.000949543
+post-recv ,       100, 0.000006274, 0.000004478, 0.000015405
+post-send ,       100, 0.001103350, 0.001079624, 0.001220619
+mid-comm  ,       100, 0.000000095, 0.000000051, 0.000000132
+wait-recv ,       100, 0.002046490, 0.001818665, 0.002300233
+wait-send ,       100, 0.000003720, 0.000001185, 0.000014253
+post-comm ,       100, 0.000971474, 0.000961989, 0.001045351
+start-up  ,         2, 0.001537822, 0.001534741, 0.001540903
+test-comm ,         2, 0.184995850, 0.184990716, 0.185000984
+bench-comm,         2, 0.251678455, 0.251676757, 0.251680153
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000480569, 0.000463316, 0.000536846
+post-recv ,       100, 0.000011663, 0.000008944, 0.000034081
+post-send ,       100, 0.002056658, 0.001561190, 0.002952586
+mid-comm  ,       100, 0.000000096, 0.000000080, 0.000000122
+wait-recv ,       100, 0.002511463, 0.001698489, 0.003322851
+wait-send ,       100, 0.000125833, 0.000082579, 0.000243112
+post-comm ,       100, 0.000498563, 0.000480124, 0.000525898
+start-up  ,         2, 0.000734562, 0.000717817, 0.000751308
+test-comm ,         2, 0.046948333, 0.046940903, 0.046955763
+bench-comm,         2, 0.284328203, 0.284312625, 0.284343782
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000479609, 0.000460971, 0.000508475
+post-recv ,       100, 0.000011306, 0.000008766, 0.000032973
+post-send ,       100, 0.001694393, 0.001208687, 0.002587042
+mid-comm  ,       100, 0.000000098, 0.000000080, 0.000000127
+wait-recv ,       100, 0.002331236, 0.001523642, 0.003142993
+wait-send ,       100, 0.000126710, 0.000078117, 0.000181506
+post-comm ,       100, 0.000497136, 0.000478971, 0.000520535
+start-up  ,         2, 0.000756359, 0.000752507, 0.000760211
+test-comm ,         2, 0.040467774, 0.040466444, 0.040469105
+bench-comm,         2, 0.257212775, 0.257211815, 0.257213736
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+          ,    number,  average(s),      min(s),      max(s)
+pre-comm  ,       100, 0.000487538, 0.000469252, 0.000506932
+post-recv ,       100, 0.000012046, 0.000008503, 0.000033207
+post-send ,       100, 0.001695998, 0.001204758, 0.002593765
+mid-comm  ,       100, 0.000000098, 0.000000080, 0.000000121
+wait-recv ,       100, 0.002340851, 0.001520241, 0.003119854
+wait-send ,       100, 0.000127374, 0.000076857, 0.000186317
+post-comm ,       100, 0.000506281, 0.000490346, 0.000530769
+start-up  ,         2, 0.000741507, 0.000737894, 0.000745121
+test-comm ,         2, 0.040664614, 0.040660409, 0.040668819
+bench-comm,         2, 0.258789112, 0.258778167, 0.258800056

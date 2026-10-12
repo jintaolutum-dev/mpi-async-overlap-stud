@@ -1,0 +1,5 @@
+===== 07_async1_at1_c1_test_all =====
+launcher=mpirun --mca plm slurm --hostfile /dss/dsshome1/08/ge63neh2/comb_lab/generated/cm4_inter/openmpi/1n2r_c24/msg_x6.00MiB_y3.00MiB_z3.00MiB/midcomm/run_001/openmpi_hosts.vDoujs -np 2 --map-by ppr:2:node:PE=24 --bind-to core --report-bindings
+comb_cmd=./comb 256_256_256 -divide 2_1_1 -periodic 1_1_1 -ghost 4_4_4 -vars 3 -comm enable mpi -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -compute_target_us 9000 -cycles 5 -print_message_sizes -print_packing_sizes 
+binding_mode=omp places + reserved async CPUs
+job_metadata_file=job_metadata.log

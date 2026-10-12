@@ -1,0 +1,9 @@
+
+===== 00_async0_c1_wait_all =====
+launcher=srun -n 2 --ntasks-per-node=1 -c 24 --cpu-bind=cores
+comb_cmd=./comb 32_32_32 -divide 2_1_1 -periodic 1_1_1 -ghost 1_1_1 -vars 128 -comm cutoff 250 -comm disable all -comm enable mpi -comm enable mock -comm post_recv wait_all -comm post_send wait_all -comm wait_recv wait_all -comm wait_send wait_all -exec enable omp -compute_target_us 1500.0 -cycles 100 -print_message_sizes -print_packing_sizes 
+binding_mode=slurm --cpu-bind=cores
+job_metadata_file=job_metadata.log
+srun: error: Slurm job 390588 has expired
+srun: Check SLURM_JOB_ID environment variable. Expired or invalid job 390588
+===== 00_async0_c1_wait_all exit code: 1 =====

@@ -1,0 +1,38 @@
+===== 03_async0_c24_test_all =====
+launcher=srun -n 2 --ntasks-per-node=1 -c 24 --cpu-bind=cores
+comb_cmd=./comb 8_8_8 -divide 2_1_1 -periodic 1_1_1 -ghost 1_1_1 -vars 12 -comm cutoff 250 -comm disable all -comm enable mpi  -comm post_recv wait_all -comm post_send wait_all -comm wait_recv test_all -comm wait_send test_all -exec enable omp -compute_target_us 20.0 -cycles 100 -print_message_sizes -print_packing_sizes 
+binding_mode=slurm --cpu-bind=cores
+job_metadata_file=job_metadata.log
+rank=1 host=cm4r15c06s04 bind_mode=slurm allowed=0-11,112-123 main_cpu_list=0-11,112-123 progress_cpu_list= main_socket_set=unknown progress_socket_set=none main_numa_set=unknown progress_numa_set=none binding_relation=no_progress_threads
+rank=0 host=cm4r15c06s03 bind_mode=slurm allowed=24-35,136-147 main_cpu_list=24-35,136-147 progress_cpu_list= main_socket_set=unknown progress_socket_set=none main_numa_set=unknown progress_numa_set=none binding_relation=no_progress_threads
+Comb version 0.3.1
+Args  ./comb;8_8_8;-divide;2_1_1;-periodic;1_1_1;-ghost;1_1_1;-vars;12;-comm;cutoff;250;-comm;disable;all;-comm;enable;mpi;-comm;post_recv;wait_all;-comm;post_send;wait_all;-comm;wait_recv;test_all;-comm;wait_send;test_all;-exec;enable;omp;-compute_target_us;20.0;-cycles;100;-print_message_sizes;-print_packing_sizes
+Started rank 0 of 2
+Node cm4r15c06s03
+Compiler "/usr/bin/c++"
+OMP num threads    24
+OMP thread map     24;137;29;142;143;144;146;147;27;33;136;140;138;25;30;31;32;141;34;35;139;145;28;26
+Cart coords         0        0        0
+Message policy cutoff 250
+Post Recv using wait_all method
+Post Send using wait_all method
+Wait Recv using test_all method
+Wait Send using test_all method
+Num cycles        100
+Num vars           12
+ghost_widths        1        1        1
+sizes               8        8        8
+divisions           2        1        1
+periodic            1        1        1
+division map
+map                 0        0        0
+map                 4        8        8
+map                 8                  
+print message and packing sizes to proc file(s)
+Starting test memcpy seq dst Host src Host
+Starting test memcpy omp dst Host src Host
+Starting test Comm mpi Mesh seq Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers seq Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host seq Host
+Starting test Comm mpi Mesh omp Host Buffers omp Host omp Host
+===== 03_async0_c24_test_all exit code: 0 =====
